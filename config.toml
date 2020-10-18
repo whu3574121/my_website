@@ -95,25 +95,25 @@ disqusShortname = ""
       title = "Homework 1"
       subtitle = "9/27/2020"
       image = "pic01.jpg"
-      url = "file:///C:/Users/oak05/Documents/[Course]%20Data%20Analytics%20for%20Finance/20200923%20Github%20Session/my_website/content/blogs/blog1.htmlogs/blog1.html"
+      url = "projects/project1"
 
     [[params.tiles.showcase]]
       title = "Homework 2"
       subtitle = "10/4/2020"
       image = "pic02.jpg"
-      url = "file:///C:/Users/oak05/Documents/[Course]%20Data%20Analytics%20for%20Finance/20200923%20Github%20Session/my_website/content/blogs/blog2.html"
+      url = "projects/project2"
 
     [[params.tiles.showcase]]
       title = "Homework 3"
       subtitle = "10/11/2020"
       image = "pic03.jpg"
-      url = "file:///C:/Users/oak05/Documents/[Course]%20Data%20Analytics%20for%20Finance/20200923%20Github%20Session/my_website/content/blogs/blog3.html"
+      url = "projects/project3"
 
     [[params.tiles.showcase]]
       title = "Final Group Project"
       subtitle = "10/19/2020"
       image = "pic04.jpg"
-      url = "blogs/blog4.html"
+      url = "projects/project4"
 
   [params.blog]
     # All blogs defined in their own files. You can find example blogs
