@@ -260,7 +260,7 @@ Seeing as the p-value is below 5% at p=0, we conclude our null hypothesis can be
 Are the mean IMDB rating for Steven Spielberg and Tim Burton are the same or not? Let's see...
 
 ```{r load-movies-data}
-movies <- read_csv(here::here("data", "movies.csv"))
+movies <- read_csv("movies.csv")
 glimpse(movies)
 ```
 
@@ -352,7 +352,7 @@ We will carry out the analysis. The objective is to find out whether there is in
 ## Loading the data
 
 ```{r load_omega_data}
-omega <- read_csv(here::here("data", "omega.csv"))
+omega <- read_csv("omega.csv")
 glimpse(omega) # examine the data frame
 ```
 
@@ -500,17 +500,7 @@ In addition to the comment made above, the relationship between these two variab
 # Challenge 1: Yield Curve inversion
 
 
-```{r yield_curve_parable.jpg, echo=FALSE, out.width="100%"}
-knitr::include_graphics(here::here("images", "yield_curve_parable.jpg"), error = FALSE)
-```
-
-
 In our case we will look at US data and use the [FRED database](https://fred.stlouisfed.org/) to download historical yield curve rates, and plot the yield curves since 1999 to see when the yield curves flatten. 
-
-```{r yield_curve_challenge, echo=FALSE, out.width="100%"}
-knitr::include_graphics(here::here("images", "yield_curve_challenge.png"), error = FALSE)
-```
-
 
 First, we will use the `tidyquant` package to download monthly rates for different durations. 
 
@@ -578,10 +568,6 @@ yield_curve
 
 ### Yields on US rates by duration since 1960
 
-```{r yield_curve_1, echo=FALSE, out.width="100%"}
-knitr::include_graphics(here::here("images", "yield_curve1.png"), error = FALSE)
-```
-
 ```{r}
 
 # Factoring so as to have the order of Rates in facet_wrap
@@ -613,10 +599,6 @@ yield_curve %>%
 ### Monthly yields on US rates by duration since 1999 on a year-by-year basis
 
 
-```{r yield_curve_2, echo=FALSE, out.width="100%"}
-knitr::include_graphics(here::here("images", "yield_curve2.png"), error = FALSE)
-```
-
 ```{r}
 
 yield_curve %>% 
@@ -635,10 +617,6 @@ yield_curve %>%
 
 
 ### 3-month and 10-year yields since 1999
-
-```{r yield_curve_3, echo=FALSE, out.width="100%"}
-knitr::include_graphics(here::here("images", "yield_curve3.png"), error = FALSE)
-```
 
 ```{r yield_curve_3_solution, fig.width=12}
 
@@ -751,7 +729,7 @@ The GDP data we will look at is from the [United Nations' National Accounts Main
 
 library(readxl)
 
-UN_GDP_data  <-  read_excel(here::here("data", "Download-GDPconstant-USD-countries.xls"), # Excel filename
+UN_GDP_data  <-  read_excel("Download-GDPconstant-USD-countries.xls", # Excel filename
                 sheet="Download-GDPconstant-USD-countr", # Sheet name
                 skip=2) # Number of rows to skip
 glimpse(UN_GDP_data)
@@ -802,9 +780,6 @@ country_list <- c("United States","India", "Germany")
 ```
 
 
-```{r gdp1, echo=FALSE, out.width="100%"}
-knitr::include_graphics(here::here("images", "gdp1.png"), error = FALSE)
-```
 ```{r, fig.width=12}
 indicatorlist <- c("GFC", "Exports", "Government expenditure", "Household expenditure", "Imports", "Gross Domestic Product (GDP)")
 
@@ -869,12 +844,6 @@ ggplot(GDP_cal, aes(x=year, group=Country)) +
 ```
 
 
-
-
-
-```{r gdp2, echo=FALSE, out.width="100%"}
-knitr::include_graphics(here::here("images", "gdp2.png"), error = FALSE)
-```
 
 
 

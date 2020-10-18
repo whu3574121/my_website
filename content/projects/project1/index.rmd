@@ -127,7 +127,7 @@ Also, countries with higher consumption of a certain type of drinks have lower c
   
 ```{r,load_movies, warning=FALSE, message=FALSE}
 
-movies <- read_csv(here::here("data", "movies.csv"))
+movies <- read_csv("movies.csv")
 glimpse(movies)
 
 ```
@@ -266,7 +266,7 @@ According to the scatterplots produced, IMDB ratings and gross revenue correlati
 
 
 ```{r load_nyse_data, message=FALSE, warning=FALSE}
-nyse <- read_csv(here::here("data","nyse.csv"))
+nyse <- read_csv("nyse.csv")
 ```
 
 
@@ -454,7 +454,7 @@ Loading the data
 
 ```{r, loading_hr_dataset}
 
-hr_dataset <- read_csv(here::here("data", "datasets_1067_1925_WA_Fn-UseC_-HR-Employee-Attrition.csv"))
+hr_dataset <- read_csv("datasets_1067_1925_WA_Fn-UseC_-HR-Employee-Attrition.csv")
 glimpse(hr_dataset)
 
 ```
@@ -703,20 +703,12 @@ ggplot(hr_cleaned, aes(x = age, y = monthly_income)) +
 
 # Challenge 1: Replicating a chart
 
-Image of White suicide rate vs White homicide rate:
-
-```{r challenge1, echo=FALSE, out.width="90%"}
-knitr::include_graphics(here::here("images", "figure3.jpeg"), error = FALSE)
-```
-
-
-
 
 Generating the above image in R:
 ```{r, challenge_1_chart}
 # Replicate Figure 3
 
-cdc_males <- read_csv(here::here("data", "CDC_males.csv"))
+cdc_males <- read_csv("CDC_males.csv")
 glimpse(cdc_males)
 
 firearm_filtered <- cdc_males %>% filter(type == "Firearm" & !is.na(gun.house.prev.category))
@@ -748,21 +740,12 @@ ggplot(firearm_filtered, aes(x=adjusted.suicide.White, y=adjusted.homicide.White
 
 # Challenge 2: 2016 California Contributors plots
 
-Image showing "Where did candidates raise most money in US elections?":
-
-```{r challenge2, echo=FALSE, out.width="100%"}
-knitr::include_graphics(here::here("images", "challenge2.png"), error = FALSE)
-```
-
-
-
-
 Generating the above image in R:
 
 ```{r, load_CA_data, warnings= FALSE, message=FALSE}
 # Make sure you use vroom() as it is significantly faster than read.csv()
-CA_contributors_2016 <- vroom::vroom(here::here("data","CA_contributors_2016.csv"))
-zipcodes_db <- vroom::vroom(here::here("zip_code_database.csv"))
+CA_contributors_2016 <- vroom::vroom("CA_contributors_2016.csv")
+zipcodes_db <- vroom::vroom("zip_code_database.csv")
 zipcodes_db$zip <- as.numeric(zipcodes_db$zip)
 zipcodes <- zipcodes_db %>% select(zip, primary_city)
 

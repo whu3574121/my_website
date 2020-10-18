@@ -234,7 +234,7 @@ Data shows us that with 95% confidence we can say that average annual delta sinc
 
 ```{r, read_gss_data, cache=TRUE}
 
-gss <- read_csv(here::here("data", "smallgss2016.csv"), 
+gss <- read_csv("smallgss2016.csv", 
                 na = c("", "Don't know",
                        "No answer", "Not applicable"))
 
@@ -427,7 +427,7 @@ In theory, a 99% confidence interval would be expected to be wider. It should en
 
 ```{r, trump_approval_margins_data, cache=TRUE}
 # Import approval polls data
-approval_polllist <- read_csv(here::here('data', 'approval_polllist.csv'))
+approval_polllist <- read_csv("approval_polllist.csv")
 
 # or directly off fivethirtyeight website
 # approval_polllist <- read_csv('https://projects.fivethirtyeight.com/trump-approval-data/approval_polllist.csv') 
@@ -454,10 +454,6 @@ approval_polllist_converted
 Calculating the average net approval rate (approve- disapprove) for each week since President Trump got into office.
 
 Image to plot:
-
-```{r trump_margins, echo=FALSE, out.width="100%"}
-knitr::include_graphics(here::here("images", "trump_approval_margin.png"), error = FALSE)
-```
 
 ```{r, trump_margins_weekly}
     
@@ -522,8 +518,8 @@ It appears that, with the US presidential elections coming up in November 2020, 
 
 ```{r, get_data, cache=TRUE}
 # load gapminder HIV data
-adults_with_hiv_percent_age_15_49 <- read_csv(here::here("data","adults_with_hiv_percent_age_15_49.csv"))
-life_expectancy_years <- read_csv(here::here("data","life_expectancy_years.csv"))
+adults_with_hiv_percent_age_15_49 <- read_csv("adults_with_hiv_percent_age_15_49.csv")
+life_expectancy_years <- read_csv("life_expectancy_years.csv")
 
 # get World bank data using wbstats
 indicators <- c("SP.DYN.TFRT.IN","SE.PRM.NENR", "SH.DYN.MORT", "NY.GDP.PCAP.KD")
@@ -738,14 +734,6 @@ ggplot(covid_chart2, aes(x=death, y=age_group)) +
 ```
 
 
-```{r covid_challenge, out.width="100%"}
-knitr::include_graphics(here::here("images", "covid_death_rate_comorbidities.png"), error = FALSE)
-knitr::include_graphics(here::here("images", "covid_death_rate_icu.png"), error = FALSE)
-```
-
-
-
-
 # Challenge 2: Excess rentals in TfL bike sharing
 
 ```{r, get_tfl_data, cache=TRUE}
@@ -772,17 +760,9 @@ bike <- bike0 %>%
 
 Create a facet grid that plots bikes hired by month and year.
 
-```{r tfl_month_year_grid, echo=FALSE, out.width="100%"}
-knitr::include_graphics(here::here("images", "tfl_distributions_monthly.png"), error = FALSE)
-```
-
 First few months of 2020 (Jan-Mar) look similar to previous years, but after that because of COVID, the variations (std deviation) is quite high as the curve is very wide.
 
 Reproduce the following two graphs.
-
-```{r tfl_absolute_monthly_change, out.width="100%"}
-knitr::include_graphics(here::here("images", "tfl_monthly.png"), error = FALSE)
-```
 
 ```{r, monthly_changes_in_tfl_bikes, fig.height = 8, fig.width = 10}
 
@@ -820,11 +800,6 @@ ggplot(monthly_data, aes(x=month, y=actual_rentals, group=year)) +
 
 
 The second one looks at percentage changes from the expected level of weekly rentals. The two grey shaded rectangles correspond to the second (weeks 14-26) and fourth (weeks 40-52) quarters.
-
-```{r tfl_percent_change, out.width="100%"}
-knitr::include_graphics(here::here("images", "tfl_weekly.png"), error = FALSE)
-```
-
 
 
 ```{r, weekly_change_in_tfl_bikes, fig.height = 8, fig.width = 10}
