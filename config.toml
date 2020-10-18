@@ -107,7 +107,7 @@ disqusShortname = ""
       title = "Homework 3"
       subtitle = "10/11/2020"
       image = "pic03.jpg"
-      url = "blogs/blog3.html"
+      url = "file:///C:/Users/oak05/Documents/[Course]%20Data%20Analytics%20for%20Finance/20200923%20Github%20Session/my_website/content/blogs/blog3.html"
 
     [[params.tiles.showcase]]
       title = "Final Group Project"
