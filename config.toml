@@ -95,25 +95,25 @@ disqusShortname = ""
       title = "Homework 1"
       subtitle = "9/27/2020"
       image = "pic01.jpg"
-      url = "blogs/blog1"
+      url = "blogs/blog1.rmd"
 
     [[params.tiles.showcase]]
       title = "Homework 2"
       subtitle = "10/4/2020"
       image = "pic02.jpg"
-      url = "blogs/blog2"
+      url = "blogs/blog2.rmd"
 
     [[params.tiles.showcase]]
       title = "Homework 3"
       subtitle = "10/11/2020"
       image = "pic03.jpg"
-      url = "blogs/blog3"
+      url = "blogs/blog3.rmd"
 
     [[params.tiles.showcase]]
       title = "Final Group Project"
       subtitle = "10/19/2020"
       image = "pic04.jpg"
-      url = "blogs/blog4"
+      url = "blogs/blog4.rmd"
 
   [params.blog]
     # All blogs defined in their own files. You can find example blogs
