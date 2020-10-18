@@ -130,8 +130,8 @@ disqusShortname = ""
     especially for students without a coding background just like me. 
     However, Teacher Kostis made R simple and easy to grasp.
     I certainly enjoyed the entire learning processs."""
-    #buttonText = "Get Started"
-    #url = "blogs"
+    buttonText = "Back to the top"
+    url = "#"
 
 
   # Contact section
