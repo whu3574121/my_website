@@ -171,9 +171,9 @@ disqusShortname = ""
     #country = "Country"
 
   # Footer section
-  #[params.footer]
-  #  enable = true
-  #  copyright = "Company Name"
+  [params.footer]
+    enable = true
+    copyright = "Stream B Group 35"
 
     # Uses font awesome icons
     #[[params.footer.social]]
