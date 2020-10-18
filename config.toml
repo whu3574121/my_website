@@ -95,25 +95,25 @@ disqusShortname = ""
       title = "Homework 1"
       subtitle = "9/27/2020"
       image = "pic01.jpg"
-      url = "blogs/aliquam"
+      url = "blogs/blog1"
 
     [[params.tiles.showcase]]
       title = "Homework 2"
       subtitle = "10/4/2020"
       image = "pic02.jpg"
-      url = "blogs/tempus"
+      url = "blogs/blog2"
 
     [[params.tiles.showcase]]
       title = "Homework 3"
       subtitle = "10/11/2020"
       image = "pic03.jpg"
-      url = "blogs/magna"
+      url = "blogs/blog3"
 
     [[params.tiles.showcase]]
       title = "Final Group Project"
       subtitle = "10/19/2020"
       image = "pic04.jpg"
-      url = "blogs/ipsum"
+      url = "blogs/blog4"
 
   [params.blog]
     # All blogs defined in their own files. You can find example blogs
@@ -137,7 +137,7 @@ disqusShortname = ""
   # Contact section
   [params.contact]
     enable = true
-    buttonSend = "Send message"
+    buttonSend = "Send Warren a message!"
     buttonClear = "Clear"
 
     # Since this template is static, the contact form uses www.formspree.io as a
