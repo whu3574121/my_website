@@ -68,12 +68,12 @@ disqusShortname = ""
 
     # Button Style 1
     [[params.navigation.button1]]
-      name = "Click Here"
-      url = "blogs"
+      name = "Click here to return"
+      url = "#"
 
     # Button Style 2
     [[params.navigation.button2]]
-      name = "Return"
+      name = "Or here"
       url = "#"
 
 
@@ -130,8 +130,8 @@ disqusShortname = ""
     especially for students without a coding background just like me. 
     However, Teacher Kostis made R simple and easy to grasp.
     I certainly enjoyed the entire learning processs."""
-    buttonText = "Get Started"
-    url = "blogs"
+    #buttonText = "Get Started"
+    #url = "blogs"
 
 
   # Contact section
