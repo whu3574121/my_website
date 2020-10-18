@@ -73,7 +73,7 @@ disqusShortname = ""
 
     # Button Style 2
     [[params.navigation.button2]]
-      name = "Log In"
+      name = "Return"
       url = "#"
 
 
@@ -100,7 +100,7 @@ disqusShortname = ""
     [[params.tiles.showcase]]
       title = "Homework 2"
       subtitle = "10/4/2020"
-      image = "london-business-school-Campus.jpg"
+      image = "pic02.jpg"
       url = "blogs/tempus"
 
     [[params.tiles.showcase]]
@@ -125,13 +125,12 @@ disqusShortname = ""
   # Section Type Two
   [params.two]
     enable = true
-    title = "Massa libero"
-    subtitle = """Nullam et orci eu lorem consequat tincidunt vivamus et sagittis libero. 
-    Mauris aliquet magna magna sed nunc rhoncus pharetra. 
-    Pellentesque condimentum sem. In efficitur ligula tate urna. Maecenas laoreet massa vel lacinia pellentesque lorem ipsum dolor. 
-    Nullam et orci eu lorem consequat tincidunt. Vivamus et sagittis libero.
-    Mauris aliquet magna magna sed nunc rhoncus amet pharetra et feugiat tempus."""
-    buttonText = "Get Started"
+    title = "My favorite Course Instructor: Prof. Christodoulou"
+    subtitle = """Data Analytics for Finance is one of the most challenging courses in the MFA program, 
+    especially for students without a coding background just like me. 
+    However, Teacher Kostis made R simple and easy to grasp.
+    I certainly enjoyed the entire learning processs."""
+    buttonText = "Go"
     url = "blogs"
 
 
@@ -159,17 +158,12 @@ disqusShortname = ""
     # by copying the corresponding map with frontmatter code.
     [[params.contact.email]]
     title = "Email"
-    email = "example@domain.com"
+    email = "whu.mfa2021@london.edu"
 
     [[params.contact.phone]]
-    title = "Phone"
-    phone = "(000) 000-0000 x1234"
+    title = "Mobile"
+    phone = "+44 7584 621543"
 
-    [[params.contact.address]]
-    title = "Address"
-    street = "Street"
-    city = "City, ST 00000"
-    country = "Country"
 
   # Footer section
   [params.footer]

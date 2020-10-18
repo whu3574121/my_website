@@ -1,0 +1,844 @@
+---
+title: "Session 2: Homework 1"
+author: "MFA Stream B - Group35"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    theme: flatly
+    highlight: zenburn
+    number_sections: yes
+    toc: yes
+    toc_float: yes
+    code_folding: show
+---
+
+
+```{r, setup, echo=FALSE}
+knitr::opts_chunk$set(
+  message = FALSE, 
+  warning = FALSE, 
+  tidy=FALSE,     # display code as typed
+  size="small")   # slightly smaller font for code
+options(digits = 3)
+
+# default figure size
+knitr::opts_chunk$set(
+  fig.width=6.75, 
+  fig.height=6.75,
+  fig.align = "center"
+)
+```
+
+
+```{r load-libraries, warning=FALSE, message=FALSE, echo=FALSE}
+library(tidyverse)  # Load ggplot2, dplyr, and all the other tidyverse packages
+library(mosaic)
+library(ggthemes)
+library(lubridate)
+library(fivethirtyeight)
+library(here)
+library(skimr)
+library(janitor)
+library(vroom)
+library(tidyquant)
+library(rvest)    # scrape websites
+library(purrr)  
+library(lubridate) #to handle dates
+library(ggplot2)
+library(ggrepel)
+library(data.table)
+library(patchwork)
+library(tidytext)
+```
+
+
+
+# Where Do People Drink The Most Beer, Wine And Spirits?
+
+```{r, load_alcohol_data}
+library(fivethirtyeight)
+data(drinks)
+
+```
+
+
+Drinks data has multiple variable types which include characters (country), integers(beer_servings, spirit_servings, wine_servings) and double(total_litres_of_pure_alcohol, in decimal format). There are no missing values (n_missing=0).
+
+```{r glimpse_skim_data}
+glimpse(drinks)
+skim(drinks)
+
+```
+
+
+Make a plot that shows the top 25 beer consuming countries
+
+```{r beer_plot}
+
+beer_plot <- arrange(drinks, desc(beer_servings)) %>% top_n(25)
+
+ggplot(data = beer_plot, mapping=aes(x=reorder(country, -beer_servings), y=beer_servings)) + 
+    geom_col() + 
+    labs(title = "Top 25 Beer Consuming countries",
+       x = "Country",
+       y = "Beer Servings") +
+  theme(axis.text.x = element_text(angle = 45 , vjust = 1, hjust=1)) + 
+  NULL
+
+```
+
+Make a plot that shows the top 25 wine consuming countries
+
+```{r wine_plot}
+
+wine_plot <- arrange(drinks, desc(wine_servings)) %>% top_n(25)
+
+ggplot(data = wine_plot, mapping=aes(x=reorder(country, -wine_servings), y=wine_servings)) + 
+    geom_col() + 
+    labs(title = "Top 25 Wine Consuming countries",
+       x = "Country",
+       y = "Wine Servings") +
+  theme(axis.text.x = element_text(angle = 45 , vjust = 1, hjust=1)) + 
+  NULL
+
+```
+
+Finally, make a plot that shows the top 25 spirit consuming countries
+```{r spirit_plot}
+
+spirit_plot <- arrange(drinks, desc(spirit_servings)) %>% top_n(25)
+
+ggplot(data = spirit_plot, mapping=aes(x=reorder(country, -spirit_servings), y=spirit_servings)) + 
+    geom_col() + 
+    labs(title = "Top 25 Spirit Consuming countries",
+       x = "Country",
+       y = "Spirit Servings") +
+  theme(axis.text.x = element_text(angle = 45 , vjust = 1, hjust=1)) + 
+  NULL
+
+```
+
+We can infer that in general, the most popular type of drinks is beer. This could be that beers are lighter in terms of pure alcohol. As a result, beer servings are higher compared to servings of the other two types of drinks since the body can tolerate a higher amount of lighter drinks. 
+
+Also, countries with higher consumption of a certain type of drinks have lower consumption of other types of drinks. This demonstrates different consumer preferences amongst countries, which the type of alcohol does not impact.
+
+# Analysis of movies- IMDB dataset
+
+  
+```{r,load_movies, warning=FALSE, message=FALSE}
+
+movies <- read_csv(here::here("data", "movies.csv"))
+glimpse(movies)
+
+```
+
+
+There are no missing values as n_missing is equal to 0 for all variables. However, there are 2,907 n_unique titles, compared to 2,961 rows of values. This indicates that there are 54 duplicate entries.
+
+``` {r, missing_values}
+
+skim(movies)
+```
+
+
+
+Count of movies by genre, ranked in descending order
+
+```{r, count_movies}
+count_genre <- movies %>% count(genre)
+
+arrange(count_genre, desc(n))
+
+```
+
+
+
+
+Table with the average gross earning and budget by genre. Also ranked genres by `return_on_budget` (how many $ did a movie make at the box office for each $ of its budget) in descending order
+
+```{r, gross_earning_vs_budget}
+
+avg_geb <- movies %>% group_by(genre) %>% summarize(avg_earn = mean(gross), avg_budget = mean(budget))
+
+avg_geb %>% mutate(return_on_budget = avg_earn/avg_budget) %>% arrange(desc(return_on_budget))
+
+```
+
+
+
+
+Top 15 directors who have created the highest gross revenue in the box office.
+
+```{r, summarize_top_directors}
+
+top_15_dirs <- movies %>% group_by(director) %>%
+  summarise(sum_gross = sum(gross, na.rm=TRUE), mean_gross=mean(gross, na.rm=TRUE),
+            median_gross=median(gross, na.rm=TRUE), std_gross=sd(gross, na.rm=TRUE), count = n()) %>%
+  arrange(desc(sum_gross)) %>% head(15)
+
+top_15_dirs
+
+```
+
+
+
+Distribution of ratings by genre 
+
+```{r, ratings_by_genre}
+
+ratings_by_genre <- movies %>% group_by(genre) %>%
+  summarise(min_rating = min(rating, na.rm=TRUE), max_rating = max(rating, na.rm=TRUE), mean_rating=mean(rating, na.rm=TRUE),
+            median_rating=median(rating, na.rm=TRUE), std_rating=sd(rating, na.rm=TRUE), count_rating= n())
+
+ratings_by_genre
+
+ggplot(movies, aes(x = rating)) +
+  geom_density() +
+  facet_wrap(~genre) + 
+  labs(title = "Distribution of ratings by genre",
+  x = "Rating") + 
+  NULL
+
+```
+
+  
+  
+Relationship between Gross Money and Cast Facebook likes
+```{r, gross_on_fblikes}
+
+ggplot(movies, aes(x=gross, y=cast_facebook_likes)) + 
+  geom_point(alpha=0.2) +
+  geom_smooth(method = "lm") + 
+  labs(title = "Relationship between Gross Money and Cast Facebook likes",
+       x = "Gross Money",
+       y = "Cast Facebook likes") +
+  theme_bw() +
+  NULL
+
+```
+
+According to the above scatterplot, the number of cast facebook likes weakly predicts the gross revenue that the movie will generate, as the linear association between the number of facebook likes and gross money is weakly positive.
+
+
+
+
+Relationship between Budget and Gross Money
+  
+
+```{r, gross_on_budget}
+
+ggplot(movies, aes(x=budget, y=gross)) + 
+  geom_point(alpha=0.2) +
+  geom_smooth(method = "lm") + 
+  labs(title = "Relationship between Budget and Gross Money",
+       x = "Budget",
+       y = "Gross Money") +
+  theme_bw() +
+  NULL
+
+```
+
+According to the scatterplot, budget and gross revenue are positively correlated, therefore budget is likely to be a good predictor of how much money a movie will make at the box office.
+
+
+
+
+Relationship between Ratings and Gross Money
+
+```{r, gross_on_rating}
+
+ggplot(movies, aes(x=rating, y=gross)) + 
+  geom_point(alpha=0.2) +
+  facet_wrap(~genre) +
+  geom_smooth(method = "lm") + 
+  labs(title = "Relationship between Ratings and Gross Money",
+       x = "Rating",
+       y = "Gross Money") +
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 45 , vjust = 1, hjust=1)) + 
+  NULL
+
+```
+
+According to the scatterplots produced, IMDB ratings and gross revenue correlation differs between genres. Ratings and gross revenue are only positively correlated if the movie is part of Action, Adventure, Animation, Biography, Comedy, Crime, Drama, Family, Fantasy, Horror, Musical, Mystery, Romance and Western. However, if the movie is part of the Documentary and Sci-fi genres, then the correlation seems negative and ratings are a weak predictor of gross revenue. Finally, it would help our analysis if we had more data for Thriller, Romance, Musical and Family genres as it is hard to draw a conclusion from a few observations.
+
+# Returns of financial stocks
+
+
+```{r load_nyse_data, message=FALSE, warning=FALSE}
+nyse <- read_csv(here::here("data","nyse.csv"))
+```
+
+
+
+
+Number of companies per sector, in descending order
+
+```{r companies_per_sector}
+
+# YOUR CODE GOES HERE
+glimpse(nyse)
+
+companies_per_sector <- nyse %>% group_by(sector) %>% count() %>% arrange(desc(n))
+companies_per_sector
+
+ggplot(companies_per_sector, aes(x=sector, y=n)) +
+  geom_col() + 
+  labs(title = "No. of companies per sector",
+       x = "Sector",
+       y = "No. of companies") + 
+  theme(axis.text.x = element_text(angle = 45 , vjust = 1, hjust=1)) + 
+  NULL
+
+```
+
+
+
+```{r, tickers_from_wikipedia}
+
+djia_url <- "https://en.wikipedia.org/wiki/Dow_Jones_Industrial_Average"
+
+#get tables that exist on URL
+tables <- djia_url %>% 
+  read_html() %>% 
+  html_nodes(css="table")
+
+
+# parse HTML tables into a dataframe called djia. 
+# Use purr::map() to create a list of all tables in URL
+djia <- map(tables, . %>% 
+               html_table(fill=TRUE)%>% 
+               clean_names())
+
+
+# constituents
+table1 <- djia[[2]] %>% # the second table on the page contains the ticker symbols
+  mutate(date_added = ymd(date_added),
+         
+         # if a stock is listed on NYSE, its symbol is, e.g., NYSE: MMM
+         # We will get prices from yahoo finance which requires just the ticker
+         
+         # if symbol contains "NYSE*", the * being a wildcard
+         # then we jsut drop the first 6 characters in that string
+         ticker = ifelse(str_detect(symbol, "NYSE*"),
+                          str_sub(symbol,7,11),
+                          symbol)
+         )
+
+# we need a vector of strings with just the 30 tickers + SPY
+tickers <- table1 %>% 
+  select(ticker) %>% 
+  pull() %>% # pull() gets them as a sting of characters
+  c("SPY") # and lets us add SPY, the SP500 ETF
+
+```
+
+
+
+
+```{r get_price_data, message=FALSE, warning=FALSE}
+
+myStocks <- tickers %>% 
+  tq_get(get  = "stock.prices",
+         from = "2000-01-01",
+         to   = "2020-08-31") %>%
+  group_by(symbol) 
+
+glimpse(myStocks) # examine the structure of the resulting data frame
+```
+
+
+
+
+Below we are calculating daily, monthly, and yearly returns.
+
+
+```{r calculate_returns, message=FALSE, warning=FALSE}
+#calculate daily returns
+myStocks_returns_daily <- myStocks %>%
+  tq_transmute(select     = adjusted, 
+               mutate_fun = periodReturn, 
+               period     = "daily", 
+               type       = "log",
+               col_rename = "daily_returns",
+               cols = c(nested.col))  
+
+#calculate monthly  returns
+myStocks_returns_monthly <- myStocks %>%
+  tq_transmute(select     = adjusted, 
+               mutate_fun = periodReturn, 
+               period     = "monthly", 
+               type       = "arithmetic",
+               col_rename = "monthly_returns",
+               cols = c(nested.col)) 
+
+#calculate yearly returns
+myStocks_returns_annual <- myStocks %>%
+  group_by(symbol) %>%
+  tq_transmute(select     = adjusted, 
+               mutate_fun = periodReturn, 
+               period     = "yearly", 
+               type       = "arithmetic",
+               col_rename = "yearly_returns",
+               cols = c(nested.col))
+```
+
+
+
+
+Summary of monthly returns since 2017-01-01 for each of the stocks and `SPY`.
+
+```{r summarise_monthly_returns}
+
+# YOUR CODE GOES HERE
+
+glimpse(myStocks_returns_monthly)
+
+monthly_return_summary <- myStocks_returns_monthly %>% filter(date >= "2017-01-01") %>% group_by(symbol) %>% 
+  summarise(min_return = min(monthly_returns, na.rm = TRUE),
+            max_return = max(monthly_returns, na.rm = TRUE),
+            median_return = median(monthly_returns, na.rm = TRUE),
+            mean_return = mean(monthly_returns, na.rm = TRUE),
+            sd_return = sd(monthly_returns, na.rm = TRUE))
+monthly_return_summary
+
+```
+
+
+
+
+Desnity Plot for each of the stocks
+```{r density_monthly_returns}
+
+# YOUR CODE GOES HERE
+
+ggplot(myStocks_returns_monthly, aes(x = monthly_returns)) +
+  geom_density() +
+  facet_wrap(~symbol) + 
+  labs(title = "Distribution of Monthly Returns",
+  x = "Monthly Returns") + 
+  NULL
+
+```
+
+
+This plot shows that in general, investing in stocks yields returns of 0 or below. DOW looks the riskiest as its standard deviation is the largest. SPY seems like the least risky as its standard deviation is the lowest, however it corresponds to the ETF and thus the least risky stock per se would be the second lowest standard deviation, which is either KO or PG.
+
+
+
+
+
+Expected monthly return (mean) of a stock vs the risk (standard deviation)
+
+```{r risk_return_plot}
+# YOUR CODE GOES HERE
+
+ggplot(monthly_return_summary, aes(x = sd_return, y = mean_return)) + 
+  geom_point() + 
+  geom_text_repel(label = monthly_return_summary$symbol) +
+  labs(title = "Risk vs Return",
+       x = "Risk",
+       y = "Mean Return") +
+  NULL
+
+```
+
+This plot shows a positive correlation between risk and return. However, a few stocks such as WBA and CVX have lower expected returns while being riskier.
+
+
+
+# On your own: IBM HR Analytics
+
+
+Loading the data
+
+```{r, loading_hr_dataset}
+
+hr_dataset <- read_csv(here::here("data", "datasets_1067_1925_WA_Fn-UseC_-HR-Employee-Attrition.csv"))
+glimpse(hr_dataset)
+
+```
+
+
+
+
+Cleaning the data
+
+```{r, cleaning_hr_dataset}
+
+hr_cleaned <- hr_dataset %>% 
+  clean_names() %>% 
+  mutate(
+    education = case_when(
+      education == 1 ~ "Below College",
+      education == 2 ~ "College",
+      education == 3 ~ "Bachelor",
+      education == 4 ~ "Master",
+      education == 5 ~ "Doctor"
+    ),
+    environment_satisfaction = case_when(
+      environment_satisfaction == 1 ~ "Low",
+      environment_satisfaction == 2 ~ "Medium",
+      environment_satisfaction == 3 ~ "High",
+      environment_satisfaction == 4 ~ "Very High"
+    ),
+    job_satisfaction = case_when(
+      job_satisfaction == 1 ~ "Low",
+      job_satisfaction == 2 ~ "Medium",
+      job_satisfaction == 3 ~ "High",
+      job_satisfaction == 4 ~ "Very High"
+    ),
+    performance_rating = case_when(
+      performance_rating == 1 ~ "Low",
+      performance_rating == 2 ~ "Good",
+      performance_rating == 3 ~ "Excellent",
+      performance_rating == 4 ~ "Outstanding"
+    ),
+    work_life_balance = case_when(
+      work_life_balance == 1 ~ "Bad",
+      work_life_balance == 2 ~ "Good",
+      work_life_balance == 3 ~ "Better",
+      work_life_balance == 4 ~ "Best"
+    )
+  ) %>% 
+  select(age, attrition, daily_rate, department,
+         distance_from_home, education,
+         gender, job_role,environment_satisfaction,
+         job_satisfaction, marital_status,
+         monthly_income, num_companies_worked, percent_salary_hike,
+         performance_rating, total_working_years,
+         work_life_balance, years_at_company,
+         years_since_last_promotion)
+
+```
+
+
+
+1. Attrition Rate of the company:
+
+```{r, attrition_rate}
+
+glimpse(hr_cleaned)
+
+employees_left <- sum(hr_cleaned$attrition == "Yes")
+employees_left
+
+total_employees <- count(hr_cleaned)
+total_employees
+
+attrition_rate <-  employees_left / total_employees * 100.0
+attrition_rate
+
+```
+
+
+
+2. Distribution of various variables:
+
+The age variable seems the closest to normal, with a mean and median value very close to each other.
+
+```{r, distribution_of_vars}
+
+cols <- c('age', 'years_at_company', 'monthly_income', 'years_since_last_promotion')
+row_names <- c('min', 'max', 'mean', 'median', 'sd')
+subset_data <- hr_cleaned[, cols]
+
+
+summary_vals <- subset_data %>% summarise_each(funs(min))
+summary_vals <- append(summary_vals, subset_data %>% summarise_each(funs(max)))
+summary_vals <- append(summary_vals, subset_data %>% summarise_each(funs(mean)))
+summary_vals <- append(summary_vals, subset_data %>% summarise_each(funs(median)))
+summary_vals <- append(summary_vals, subset_data %>% summarise_each(funs(sd)))
+
+summary_matrix <- matrix(summary_vals, nrow = 5, dimnames = list(row_names, cols), byrow = TRUE)
+summary_matrix
+
+ggplot(hr_cleaned, aes(x=age)) + labs(title = "Distribution of age", x = "age") + 
+  geom_density() + NULL
+ggplot(hr_cleaned, aes(x=years_at_company)) + labs(title = "Distribution of No. of yeas at company", x = "Years at company") +
+  geom_density() + NULL
+ggplot(hr_cleaned, aes(x=monthly_income)) + labs(title = "Distribution of Monthly income", x = "Monthly income") + 
+  geom_density() + NULL
+ggplot(hr_cleaned, aes(x=years_since_last_promotion)) + labs(title = "Distribution of Years since last promotion",
+                                                             x = "Years since last promotion") +
+  geom_density() + NULL
+
+```
+
+
+
+3. Distribution of `job_satisfaction` and `work_life_balance`:
+
+```{r, job_vs_worklife}
+
+job_satisfaction_dist <- hr_cleaned %>% group_by(job_satisfaction) %>% count() %>% mutate(prcnt = n/nrow(hr_cleaned)*100.0)
+job_satisfaction_dist
+
+work_lif_bal_dist <- hr_cleaned %>% group_by(work_life_balance) %>% count() %>% mutate(prcnt = n/nrow(hr_cleaned)*100.0)
+work_lif_bal_dist
+  
+ggplot(job_satisfaction_dist, aes(x = job_satisfaction, y = prcnt)) + 
+  geom_col() + 
+  labs(title = "Job Satisfaction Bar Plot",
+       x = "Job Satisfaction",
+       y = "Percent of Population") + 
+  NULL
+
+ggplot(work_lif_bal_dist, aes(x = work_life_balance, y = prcnt)) + 
+  geom_col() + 
+  labs(title = "Work Life Balance Bar Plot",
+       x = "Work Life Balance",
+       y = "Percent of Population") + 
+  NULL
+
+
+```
+
+
+
+
+4. Relationship between monthly income and education, and Monthly income and gender:
+
+```{r, var_relationship}
+
+ggplot(hr_cleaned, aes(x=education, y=monthly_income)) +
+  geom_boxplot() +
+  labs(title = "Relationship between Education and Monthly Income",
+       x = "Education",
+       y = "Monthly Income") + 
+  NULL
+
+ggplot(hr_cleaned, aes(x=gender, y=monthly_income)) +
+  geom_boxplot() +
+  labs(title = "Relationship between Gender and Monthly Income",
+       x = "Gender",
+       y = "Monthly Income") + 
+  NULL
+
+```
+
+There seems to be a slight relationship between education and monthly income as the higher the education level, the higher monthly income tends to be.However, the dataset does not seem to show any substantial relationship between gender and monthly income, with both male and female showing similar monthly income distribution.
+
+
+
+
+5. Boxplot of income vs job role:
+
+```{r, income_vs_job}
+
+new_order <- with(hr_cleaned, reorder(job_role, -monthly_income, median , na.rm=T))
+
+ggplot(hr_cleaned, aes(x=new_order, y=monthly_income)) +
+  geom_boxplot() +
+  labs(title = "Relationship between Job Role and Monthly Income",
+       subtitle = "(ordered based on median values of highest-paid job roles",
+       x = "Job Role",
+       y = "Monthly Income") + 
+  theme(axis.text.x = element_text(angle = 45 , vjust = 1, hjust=1)) + 
+  NULL
+
+```
+
+
+
+
+6. Median income by education level:
+
+```{r, income_vs_education}
+
+income_vs_education <- hr_cleaned %>% group_by(education) %>%
+  summarise(min_income = min(monthly_income),
+            max_income = max(monthly_income),
+            mean_income = mean(monthly_income),
+            median_income = median(monthly_income))
+
+income_vs_education
+
+ggplot(income_vs_education, aes(x=education, y=median_income)) +
+  geom_col() + 
+  labs(title = "Education vs Income Level",
+       x = "Education Level",
+       y = "Median Income") + 
+  NULL
+
+```
+
+
+
+
+7. Distribution of income by education level:
+
+```{r, dist_income_vs_edu}
+
+ggplot(hr_cleaned, aes(x = monthly_income)) +
+  geom_density() +
+  facet_wrap(~education) + 
+  labs(title = "Distribution of income by education level",
+  x = "Monthly Income") + 
+  theme_economist() +
+  theme(axis.text.x = element_text(angle = 45 , vjust = 1, hjust=1)) + 
+  NULL
+
+```
+
+
+
+
+8. Relationship between Income and age, given a particular job role:
+
+```{r, income_vs_age_by_job_role}
+
+ggplot(hr_cleaned, aes(x = age, y = monthly_income)) +
+  geom_col() +
+  facet_wrap(~job_role) + 
+  labs(title = "Income vs Age by job role",
+  x = "Age",
+  y = "Monthly Income") + 
+  theme_solarized() +
+  theme(axis.text.x = element_text(angle = 45 , vjust = 1, hjust=1)) + 
+  NULL
+
+```
+
+
+# Challenge 1: Replicating a chart
+
+Image of White suicide rate vs White homicide rate:
+
+```{r challenge1, echo=FALSE, out.width="90%"}
+knitr::include_graphics(here::here("images", "figure3.jpeg"), error = FALSE)
+```
+
+
+
+
+Generating the above image in R:
+```{r, challenge_1_chart}
+# Replicate Figure 3
+
+cdc_males <- read_csv(here::here("data", "CDC_males.csv"))
+glimpse(cdc_males)
+
+firearm_filtered <- cdc_males %>% filter(type == "Firearm" & !is.na(gun.house.prev.category))
+glimpse(firearm_filtered)
+
+ggplot(firearm_filtered, aes(x=adjusted.suicide.White, y=adjusted.homicide.White)) +
+  geom_point(aes(size = firearm_filtered$average.pop.white,
+                 fill = firearm_filtered$gun.house.prev.category), color = "black", pch = 21) + 
+  scale_color_manual(values = c("#feedde", "#fdbe85", "#fd8d3c", "#d94701"), aesthetics = c("fill")) + 
+  labs(x='White suicide rate (per 100,000 per year)',
+       y='White homicide rate (per 100,000 per year)') +
+  scale_size_area(breaks = c(500000, 1500000, 3000000, 7000000), 
+                  labels = c('500k', '1.5m', '3m', '7m'), max_size = 14) +
+  geom_text_repel(label = firearm_filtered$ST) + 
+  geom_text(label = "Spearman's rho: 0.74", x = 24.5, y = 0.7) +
+  guides(fill = guide_legend(title = "Gun ownership", order = 1),
+         size = guide_legend(title = "White population", order = 2)) + 
+  NULL
+
+
+# Sources:
+# https://stackoverflow.com/questions/10437442/place-a-border-around-points
+# https://stackoverflow.com/questions/40211451/geom-text-how-to-position-the-text-on-bar-as-i-want
+# https://ggplot2.tidyverse.org/reference/scale_manual.html
+# https://ggplot2.tidyverse.org/reference/guides.html
+
+```
+
+
+# Challenge 2: 2016 California Contributors plots
+
+Image showing "Where did candidates raise most money in US elections?":
+
+```{r challenge2, echo=FALSE, out.width="100%"}
+knitr::include_graphics(here::here("images", "challenge2.png"), error = FALSE)
+```
+
+
+
+
+Generating the above image in R:
+
+```{r, load_CA_data, warnings= FALSE, message=FALSE}
+# Make sure you use vroom() as it is significantly faster than read.csv()
+CA_contributors_2016 <- vroom::vroom(here::here("data","CA_contributors_2016.csv"))
+zipcodes_db <- vroom::vroom(here::here("zip_code_database.csv"))
+zipcodes_db$zip <- as.numeric(zipcodes_db$zip)
+zipcodes <- zipcodes_db %>% select(zip, primary_city)
+
+glimpse(CA_contributors_2016)
+glimpse(zipcodes_db)
+
+contributors_with_city <- CA_contributors_2016 %>%  left_join(zipcodes, by = "zip")
+glimpse(contributors_with_city)
+
+tbl_Hillary <- contributors_with_city %>% filter(cand_nm == "Clinton, Hillary Rodham") %>% 
+  group_by(primary_city) %>% summarise(city_contribution = sum(contb_receipt_amt)) %>% 
+  arrange(desc(city_contribution)) %>% mutate(cand_nm = "Clinton, Hillary Rodham") %>% head(10) 
+plot_Hillary <- ggplot(tbl_Hillary, aes(x=reorder(primary_city, city_contribution), y=city_contribution,
+                                        fill = cand_nm)) +
+  scale_color_manual(values = c("#0080ff"), aesthetics = c("fill")) + 
+  labs(title = "Clinton, Hillary Rodham", x = NULL, y = NULL) +
+  geom_col(show.legend = FALSE) + coord_flip() + NULL
+
+tbl_Donald <- contributors_with_city %>% filter(cand_nm == "Trump, Donald J.") %>% 
+  group_by(primary_city) %>% summarise(city_contribution = sum(contb_receipt_amt)) %>% 
+  arrange(desc(city_contribution)) %>% mutate(cand_nm = "Trump, Donald J.")  %>% head(10)
+plot_Donald <- ggplot(tbl_Donald, aes(x=reorder(primary_city, city_contribution), y=city_contribution,
+                       fill = cand_nm)) + 
+  scale_color_manual(values = c("#cc0000"), aesthetics = c("fill")) +
+  labs(title = "Trump, Donald J.", x = NULL, y = NULL) +
+  geom_col(show.legend = FALSE) + coord_flip() + NULL
+
+
+plot_Hillary + plot_Donald
+
+```
+
+
+
+
+Generating the similar image for Top 10 candidates:
+
+```{r, top_10_candidates}
+
+top_10_candidate_names <- contributors_with_city %>% group_by(cand_nm) %>%
+  summarise(sum_contribution = sum(contb_receipt_amt)) %>% arrange(desc(sum_contribution)) %>% head(10) %>% 
+  select(cand_nm)
+top_10_candidate_names
+
+db_candidate_and_city <- contributors_with_city %>% filter(cand_nm %in% top_10_candidate_names$cand_nm) %>% 
+  group_by(cand_nm, primary_city) %>% summarise(city_contribution = sum(contb_receipt_amt)) %>% ungroup
+
+db_candidate_and_city %>% group_by(cand_nm) %>% top_n(10) %>% ungroup %>% 
+  mutate(cand_nm = as.factor(cand_nm),
+         primary_city = reorder_within(primary_city, city_contribution, cand_nm)) %>%
+  ggplot(aes(primary_city, city_contribution, fill = cand_nm)) +
+  geom_col(show.legend = FALSE) +
+  facet_wrap(~cand_nm, scales = "free_y") +
+  coord_flip() +
+  scale_x_reordered() +
+  scale_y_continuous(expand = c(0,0)) +
+  labs(y = "Amount raised",
+       x = NULL,
+       title = "Where did candidates raise money?") +
+  theme(axis.text.x = element_text(angle = 45 , vjust = 1, hjust=1)) + 
+  NULL
+
+```
+
+
+# Details
+
+- Who did you collaborate with: DEEPAK GUNEJA, WARREN HU, JUSTINE VEYRENC, RICCARDO PERSICO, ALEX SKLAVOUNOS, CHENYING LI
+- Approximately how much time did you spend on this problem set: 10 HOURS
+- What, if anything, gave you the most trouble: FINDING WHY THERE WERE ERRORS
+
+
+
+
+
+
+
+
+
