@@ -1,7 +1,7 @@
 # Site settings
 baseURL = "https://warrensportfolio.netlify.app/"
 languageCode = "en-us"
-title = "Portfolio Website for Warren Hu"
+title = "Warren's Portfolio Website"
 theme = "forty"
 
 # Enter your tracking code to enable Google Analytics
@@ -38,26 +38,26 @@ disqusShortname = ""
   # Navigation Section
   [params.navigation]
     title = "Warren Hu"
-    subtitle = "By HTML5 Up"
+    subtitle = "London Business School MFA2021"
     menu = "Menu"
     # Optional logo as brand stored in img/
     # logo = "logo.png"
 
-    [[params.navigation.links]]
-      name = "Home"
-      url = "#"
+    #[[params.navigation.links]]
+    #  name = "Home"
+    #  url = "#"
 
-    [[params.navigation.links]]
-      name = "Blogs"
-      url = "blogs"
+    #[[params.navigation.links]]
+    #  name = "Blogs"
+    #  url = "blogs"
 
-    [[params.navigation.links]]
-      name = "Generic Blog"
-      url = "blogs/ipsum"
+    #[[params.navigation.links]]
+    #  name = "Generic Blog"
+    #  url = "blogs/ipsum"
 
-    [[params.navigation.links]]
-      name = "Elements"
-      url = "elements.html"
+    #[[params.navigation.links]]
+    #  name = "Elements"
+    #  url = "elements.html"
 
     # Add custom links here by uncommenting code below. To remove links just delete
     # the [[params.navigation.links]] map associated with that link. Copy and paste
@@ -68,7 +68,7 @@ disqusShortname = ""
 
     # Button Style 1
     [[params.navigation.button1]]
-      name = "Get Started"
+      name = "Click Here"
       url = "blogs"
 
     # Button Style 2
@@ -83,7 +83,7 @@ disqusShortname = ""
     # the 'static/img' folder.
     title = "Hi, my name is Warren"
     subtitle = "This is my portfolio website"
-    buttonText = "Get Started"
+    buttonText = "Start Here"
 
 
   # Tiles Section
@@ -92,41 +92,28 @@ disqusShortname = ""
     # Display your showcases here.
     
     [[params.tiles.showcase]]
-      title = "Aliquam"
-      subtitle = "Ipsum Dolor Sit Amet"
+      title = "Homework 1"
+      subtitle = "9/27/2020"
       image = "pic01.jpg"
       url = "blogs/aliquam"
 
     [[params.tiles.showcase]]
-      title = "Tempus"
-      subtitle = "Feugiat Amet Tempus"
-      image = "pic02.jpg"
+      title = "Homework 2"
+      subtitle = "10/4/2020"
+      image = "london-business-school-Campus.jpg"
       url = "blogs/tempus"
 
     [[params.tiles.showcase]]
-      title = "Magna"
-      subtitle = "Lorem Etiam Nullam"
+      title = "Homework 3"
+      subtitle = "10/11/2020"
       image = "pic03.jpg"
       url = "blogs/magna"
 
     [[params.tiles.showcase]]
-      title = "Ipsum"
-      subtitle = "Nisl Sed Aliquam"
+      title = "Final Group Project"
+      subtitle = "10/19/2020"
       image = "pic04.jpg"
       url = "blogs/ipsum"
-
-    [[params.tiles.showcase]]
-      title = "Consequat"
-      subtitle = "Ipsum Dolor Sit Amet"
-      image = "pic05.jpg"
-      url = "blogs/ipsum"
-
-    [[params.tiles.showcase]]
-      title = "Etiam"
-      subtitle = "Feugiat Amet Tempus"
-      image = "pic06.jpg"
-      url = "blogs/ipsum"
-    # You can make more showcases by copy and pasting the code above
 
   [params.blog]
     # All blogs defined in their own files. You can find example blogs
