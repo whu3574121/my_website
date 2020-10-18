@@ -1,6 +1,6 @@
 ---
-title: "Session 4: Homework 2"
-author: "MFA Stream B - Group35"
+title: "Session 6: Homework 3"
+author: "MFA Stream B - Group 35"
 date: "`r Sys.Date()`"
 output:
   html_document:
@@ -13,7 +13,7 @@ output:
 ---
 
 
-```{r, setup, include=FALSE}
+```{r, setup, echo=FALSE}
 knitr::opts_chunk$set(
   message = FALSE, 
   warning = FALSE, 
@@ -30,787 +30,706 @@ knitr::opts_chunk$set(
 ```
 
 
-```{r load-libraries, include=FALSE}
+```{r load-libraries, echo=FALSE}
 library(tidyverse)  # Load ggplot2, dplyr, and all the other tidyverse packages
 library(mosaic)
 library(ggthemes)
-library(lubridate)
+library(GGally)
+library(readxl)
 library(here)
 library(skimr)
 library(janitor)
-library(httr)
-library(readxl)
-library(vroom)
+library(broom)
+library(tidyquant)
 library(infer)
-library(ggplot2)
-library(ggrepel)
+library(openintro)
+library(tidyquant)
+library(reshape2)
+library(patchwork)
+library(scales)
 ```
 
 
 
-# Climate change and temperature anomalies 
+# Youth Risk Behavior Surveillance
 
-Loading the file:
+Every two years, the Centers for Disease Control and Prevention conduct the [Youth Risk Behavior Surveillance System (YRBSS)](https://www.cdc.gov/healthyyouth/data/yrbs/index.htm) survey, where it takes data from high schoolers (9th through 12th grade), to analyze health patterns. We selected group of variables from a random sample of observations during one of the years the YRBSS was conducted.
 
-```{r weather_data, cache=TRUE}
+## Load the data
 
-weather <- 
-  read_csv("https://data.giss.nasa.gov/gistemp/tabledata_v3/NH.Ts+dSST.csv", 
-           skip = 1, 
-           na = "***")
+
+```{r}
+data(yrbss)
+glimpse(yrbss)
+```
+
+```{r, summary_yrbss, fig.width=12}
+
+# skimming data
+skim(yrbss)
+
+# summarizing statistics for age, height, weight, physically_active_7d, strength_training_7d
+
+cols <- c('age', 'height', 'weight', 'physically_active_7d', 'strength_training_7d')
+row_names <- c('min', 'max', 'mean', 'median', 'sd')
+
+# Removing NAs
+yrbss_cleaned <- yrbss[, cols] %>% na.omit()
+
+summary_vals <- yrbss_cleaned %>% summarise_each(funs(min))
+summary_vals <- append(summary_vals, yrbss_cleaned %>% summarise_each(funs(max)))
+summary_vals <- append(summary_vals, yrbss_cleaned %>% summarise_each(funs(mean)))
+summary_vals <- append(summary_vals, yrbss_cleaned %>% summarise_each(funs(median)))
+summary_vals <- append(summary_vals, yrbss_cleaned %>% summarise_each(funs(sd)))
+
+summary_matrix <- matrix(summary_vals, nrow = 5, dimnames = list(row_names, cols), byrow = TRUE)
+summary_matrix
+
+# Histogram for Age
+
+age_hist <- ggplot(yrbss_cleaned, aes(x=age)) + 
+  geom_histogram() +
+  labs(title = "17 years old are the most\n numerous in the sample", subtitle = '\nAge distribution', x= "\nAge", y="Count\n") +
+  theme_economist()
+
+# Histogram for height
+
+height_hist <- ggplot(yrbss_cleaned, aes(x=height)) + 
+  geom_histogram() +
+  labs(title = "Most respondents are around\n 1.7m tall", subtitle = '\nHeight distribution', x= "\nHeight", y="Count\n") +
+  theme_economist()
+
+# Histogram for weight
+
+weight_hist <- ggplot(yrbss_cleaned, aes(x=weight)) + 
+  geom_histogram()+
+  labs(title = "The weight distribution is\n heavily right skewed", subtitle = '\nWeight distribution', x= "\nWeight", y="Count\n") +
+  theme_economist()
+
+# Histogram for physically_active_7d
+
+physically_active_7d_hist <- ggplot(yrbss_cleaned, aes(x=physically_active_7d)) + 
+  geom_histogram()+
+  labs(title = "The respondents are \n very active or totally inactive", subtitle = '\nDaily distribution of physical activity', x= "\n# of days", y="Count\n") +
+  theme_economist()
+
+# Histogram for strength_training_7d
+
+strength_training_7d_hist <- ggplot(yrbss_cleaned, aes(x=strength_training_7d)) + 
+  geom_histogram()+
+  labs(title = "The respondents don't seem\n to enjoy strength training", subtitle = '\nDaily distribution of strength training', x= "\n# of days", y="Count\n") +
+  theme_economist()
+
+age_hist + height_hist + weight_hist + physically_active_7d_hist + strength_training_7d_hist
 
 ```
 
 
-Selecting the year and the twelve month variables from the `weather` dataset, and converting the dataframe from wide to 'long' format.
+## Exploratory Data Analysis
 
+You will first start with analyzing the `weight` of participants in kilograms. Using visualization and summary statistics, describe the distribution of weights. How many observations are we missing weights from?
 
-```{r tidyweather}
+```{r, eda_on_weight}
 
-glimpse(weather)
+yrbss_weight <- yrbss %>% 
+  summarise(mean_weight=mean(weight, na.rm=TRUE), 
+            sd_weight=sd(weight, na.rm=TRUE), 
+            count=count(weight, na.rm=TRUE))
 
-tidyweather <- weather %>% select(c(1:13)) %>% 
-  pivot_longer(cols = 2:13, names_to = "month", values_to = "delta")
+yrbss_weight
 
-glimpse(tidyweather)
-```
-
-
-## Plotting Information
-
-Plotting the data using a time-series scatter plot, and adding a trendline.
-
-
-```{r scatter_plot}
-
-tidyweather <- tidyweather %>%
-  mutate(date = ymd(paste(as.character(Year), month, "1")),
-         month = month(date, label=TRUE),
-         year = year(date))
-
-glimpse(tidyweather)
-
-ggplot(tidyweather, aes(x=year, y = delta))+
-  geom_point()+
-  geom_smooth(color="red") +
-  theme_bw() +
-  labs (
-    title = "Weather Anomalies",
-    y = "Delta",
-    x = "Year"
-  )
+ggplot(yrbss, aes(x=weight)) +
+  geom_density() +
+  labs(title="Distribution of weights amongst high schoolers", x= "Weight(kg)", y="Density")
 
 ```
-
-
-```{r facet_wrap}
-
-ggplot(tidyweather, aes(x=year, y = delta))+
-  geom_point()+
-  geom_smooth(color="red") +
-  facet_wrap(~month) + 
-  theme_bw() +
-  labs (
-    title = "Weather Anomalies",
-    x = "Year",
-    y = "Delta"
-  )
-
-```
-
-We can see that the effect of increasing temperature is more pronounced in months Jan-April, where the delta is varying a lot and by greater extent.
-
-
-```{r intervals}
-
-comparison <- tidyweather %>% 
-  filter(Year>= 1881) %>%     #remove years prior to 1881
-  #create new variable 'interval', and assign values based on criteria below:
-  mutate(interval = case_when(
-    Year %in% c(1881:1920) ~ "1881-1920",
-    Year %in% c(1921:1950) ~ "1921-1950",
-    Year %in% c(1951:1980) ~ "1951-1980",
-    Year %in% c(1981:2010) ~ "1981-2010",
-    TRUE ~ "2011-present"
-  ))
-
-glimpse(comparison)
-
-```
-
-Creating a density plot to study the distribution of monthly deviations (`delta`), grouped by the different time periods.
-
-```{r density_plot}
-
-ggplot(comparison, aes(x=delta, fill=interval))+
-  geom_density(alpha=0.2) +   #density plot with tranparency set to 20%
-  theme_bw() +                #theme
-  labs (
-    title = "Density Plot for Monthly Temperature Anomalies",
-    y     = "Density",         #changing y-axis label to sentence case,
-    x = "Delta"
-  )
-
-```
-
-Average annual anomalies. 
-
-```{r averaging}
-
-#creating yearly averages
-average_annual_anomaly <- tidyweather %>% 
-  group_by(year) %>%   #grouping data by Year
-  
-  # creating summaries for mean delta 
-  # use `na.rm=TRUE` to eliminate NA (not available) values 
-  summarise(annual_average_delta = mean(delta, na.rm=TRUE)) 
-
-#plotting the data:
-ggplot(average_annual_anomaly, aes(x=year, y= annual_average_delta))+
-  geom_point()+
-  
-  #Fit the best fit line, using LOESS method
-  geom_smooth() +
-  
-  #change to theme_bw() to have white background + black frame around plot
-  theme_bw() +
-  labs (
-    title = "Average Yearly Anomaly",
-    y     = "Average Annual Delta",
-    x = "Year"
-  )                         
-
-
-```
-
-
-## Confidence Interval for `delta`
-
-constructing a confidence interval for the average annual delta since 2011, using a formula.
-
-```{r, calculate_CI_using_formula}
-
-formula_ci <- comparison %>% filter(interval == "2011-present") %>% 
-  summarise(mean_delta = mean(delta, na.rm = TRUE),
-            sd_delta = sd(delta, na.rm = TRUE),
-            count_delta = n()) %>%
-  mutate(se_delta = sd_delta / sqrt(count_delta),
-         lower_ci = mean_delta - qt(1 - (0.05 / 2), count_delta - 1) * se_delta,
-         upper_ci = mean_delta + qt(1 - (0.05 / 2), count_delta - 1) * se_delta)
-
-
-#print out formula_CI
-formula_ci
-```
-
-
-```{r, calculate_CI_using_bootstrap}
-
-# use the infer package to construct a 95% CI for delta
-set.seed(1234)
-
-bootstrap_data <- comparison %>% filter(interval == "2011-present") %>% 
-  specify(response = delta) %>% 
-  generate(reps=1000, type="bootstrap") %>%
-  calculate(stat="mean")
-
-ci_bootstrap <- bootstrap_data %>% 
-  get_confidence_interval(level = 0.95, type = "percentile")
-
-ci_bootstrap
-
-ggplot(bootstrap_data, aes(x=stat)) +
-  geom_density(color="red") +
-  stat_function(fun = dnorm, color="blue", args = list(mean = mean(bootstrap_data$stat), sd = sd(bootstrap_data$stat))) +
-  theme_bw() + 
-  labs(title = "Comparing Bootstrap (red) with Normal Distribution (blue) curve",
-       y = "Density")
-```
-
-Data shows us that with 95% confidence we can say that average annual delta since 2011 lies between 0.92 and 1.02, which is a significant number. If this trend continues, it'd be too late reverse the impact and save our planet. 
-
-# General Social Survey (GSS)
-
-
-```{r, read_gss_data, cache=TRUE}
-
-gss <- read_csv(here::here("data", "smallgss2016.csv"), 
-                na = c("", "Don't know",
-                       "No answer", "Not applicable"))
-
-glimpse(gss)
-
-```
-
-
-## Instagram and Snapchat, by sex
-
-Estimating the *population* proportion of Snapchat or Instagram users in 2016:
-
-1. Creating a  new variable, `snap_insta` that is *Yes* if the respondent reported using any of Snapchat (`snapchat`) or Instagram (`instagrm`), and *No* if not. If the recorded value was NA for both of these questions, the value in this new variable is also NA.
-
-```{r, hours_spent_on_email_weekly}
-gss <- gss %>% mutate(snap_insta = case_when(
-  snapchat=="Yes"|instagrm=="Yes"~"Yes",
-  snapchat=="No"|instagrm=="No"~"No",
-  TRUE~"NA"))
-
-```
-
-2. Calculating the proportion of Yes’s for `snap_insta` among those who answered the question, i.e. excluding NAs.
-
-```{r, snap_insta_proportion}
-
-gss_snap_insta_cleaned <- gss %>%
-  filter(snap_insta %in% c("Yes", "No")) %>% 
-  mutate(snap_insta_val = ifelse(snap_insta == "Yes", 1, 0))
-
-snap_insta_prop <-  gss_snap_insta_cleaned %>%
-  summarise(proportion=prop(snap_insta_val, success = 1))
-
-snap_insta_prop
-```
-
-3. Constructing 95% CIs for men and women who used either Snapchat or Instagram
-
-
-```{r, CI_snap_insta }
-
-formula_ci <- gss_snap_insta_cleaned %>% group_by(sex) %>% 
-  summarise(mean_sip= mean(snap_insta_val, na.rm = TRUE),
-            sd_sip = sd(snap_insta_val, na.rm = TRUE),
-            count_sip = n()) %>%
-  mutate(se_sip = sd_sip / sqrt(count_sip),
-         lower_ci = mean_sip - qt(1 - (0.05 / 2), count_sip - 1) * se_sip,
-         upper_ci = mean_sip + qt(1 - (0.05 / 2), count_sip - 1) * se_sip)
-
-formula_ci
-
-```
-
-## Twitter, by education level
-
-Estimate the *population* proportion of Twitter users by education level in 2016. 
-
-There are 5 education levels in variable `degree` which, in ascneding order of years of education, are Lt high school, High School, Junior college, Bachelor, Graduate. 
-
-1. Turn `degree` from a character variable into a factor variable. Make sure the order is the correct one and that levels are not sorted alphabetically which is what R by default does. 
-
-```{r, degree}
-gss_degree_cleaned <- gss %>% filter(!degree %in% c("NA"))
-gss_degree_cleaned$degree <- factor(gss_degree_cleaned$degree, ordered=TRUE, levels = c("Lt high school","High school", "Junior college", "Bachelor", "Graduate"))
-
-unique(gss_degree_cleaned$degree)
-
-```
-
-2. Create a  new variable, `bachelor_graduate` that is *Yes* if the respondent has either a `Bachelor` or `Graduate` degree. As before, if the recorded value for either was NA, the value in your new variable should also be NA.
-
-```{r, bachelor_graduate}
-gss <- gss %>% mutate(bachelor_graduate = case_when(degree=="Bachelor"|degree=="Graduate"~"Yes", degree=="NA"~"NA",
-                                                    TRUE~"No"))
-
-gss
-
-```
-
-3. Calculate the proportion of `bachelor_graduate` who do (Yes) and who don't (No) use twitter. 
-
-```{r, bachelor_graduate_twitter}
-
-twitter_prop_yes <- gss %>%
-  filter(bachelor_graduate == "Yes" & !twitter %in% "NA") %>%
-  summarise(proportion=count(twitter=="Yes")/n())
-
-twitter_prop_yes
-
-twitter_prop_no <- gss %>%
-  filter(bachelor_graduate == "Yes" & !twitter %in% "NA") %>%
-  summarise(proportion=count(twitter=="No")/n())
-
-twitter_prop_no
-
-
-```
-
-4. Using the CI formula for proportions, please construct two 95% CIs for `bachelor_graduate` vs whether they use (Yes) and don't (No) use twitter. 
-
-```{r, twitter_bachelor_graduate}
-twitter_yes <- gss %>%
-  filter(bachelor_graduate=="Yes" & !twitter %in% "NA") %>%
-  mutate(twitter_val = ifelse(twitter == "Yes", 1, 0)) %>% 
-  summarise(mean_val= mean(twitter_val, na.rm=TRUE),
-            sd_val = sd(twitter_val, na.rm=TRUE),
-            count = n()) %>%
-  mutate(se = sd_val / sqrt(count),
-         lower_ci = mean_val - qt(1 - (0.05 / 2), count - 1) * se,
-         upper_ci = mean_val + qt(1 - (0.05 / 2), count - 1) * se)
-
-twitter_yes
-
-twitter_no <- gss %>%
-  filter(bachelor_graduate=="Yes" & !twitter %in% "NA") %>%
-  mutate(twitter_val = ifelse(twitter == "No", 1, 0)) %>% 
-  summarise(mean_val= mean(twitter_val, na.rm=TRUE),
-            sd_val = sd(twitter_val, na.rm=TRUE),
-            count = n()) %>%
-  mutate(se = sd_val / sqrt(count),
-         lower_ci = mean_val - qt(1 - (0.05 / 2), count - 1) * se,
-         upper_ci = mean_val + qt(1 - (0.05 / 2), count - 1) * se)
-
-twitter_no
-
-```
-
-5. Do these two Confidence Intervals overlap? No, these don't overlap.
-
-
-## Email usage
-
-Can we estimate the *population* parameter on time spent on email weekly?
-
-1. Create a new variable called `email` that combines `emailhr` and `emailmin` to reports the number of minutes the respondents spend on email weekly.
-
-```{r,}
-gss$emailhr <- as.numeric(gss$emailhr)
-gss$emailmin <- as.numeric(gss$emailmin)
-
-gss_email <- gss %>% filter(!is.na(emailhr) & !is.na(emailmin)) %>% 
-  mutate(email = emailhr*60+emailmin)
-
-gss_email
-```
-
-2. Visualise the distribution of this new variable. Find the mean and the median number of minutes respondents spend on email weekly. Is the mean or the median a better measure of the typical amoung of time Americans spend on email weekly? Why?
-
-```{r, mean_median}
-
-ggplot(gss_email, aes(x=email)) + geom_density() +labs(title="Weekly time spent on email by Americans", x="Weekly time spent on email (min)", y="Density")
-
-mean_median <- gss_email %>% summarise(mean_email=mean(email, na.rm=TRUE), median_email=median(email, na.rm=TRUE))
-
-mean_median
-
-```
-
-The median seems to be a better measure of the weekly time spent by Americans on email as the density plot suggests that the large majority of Americans spend around 120 min on their emails every week.In fact, only around 0.05% of the American population surveyed here spends around 417 min on their emails.
-
-
-3. Using the `infer` package, calculate a 95% bootstrap confidence interval for the mean amount of time Americans spend on email weekly. Interpret this interval in context of the data, reporting its endpoints in “humanized” units (e.g. instead of 108 minutes, report 1 hr and 8 minutes). If you get a result that seems a bit odd, discuss why you think this might be the case.
-
-```{r, ci_email}
-set.seed(1234)
-
-email_ci_bootstrap <- gss_email %>% filter(!is.na(email)) %>% 
-  specify(response = email) %>% 
-  generate(reps=1000, type="bootstrap") %>%
-  calculate(stat="mean") %>% 
-  get_confidence_interval(level = 0.95, type = "percentile")
-
-email_ci_bootstrap
-
-pretty_ci <- email_ci_bootstrap %>%  mutate(lower_ci_hour=lower_ci%/%60, lower_ci_minute=round(lower_ci%%60,0),upper_ci_hour=upper_ci%/%60, upper_ci_minute=round(upper_ci%%60,0))
-
-pretty_ci
-
-paste("Lower ci: ", pretty_ci$lower_ci_hour,"hours and", pretty_ci$lower_ci_minute, "minutes")
-paste("Upper ci:", pretty_ci$upper_ci_hour, "hours and", pretty_ci$upper_ci_minute, "minutes")
-```
-
-
-4. Would you expect a 99% confidence interval to be wider or narrower than the interval you calculated above? Explain your reasoning.
-In theory, a 99% confidence interval would be expected to be wider. It should encompass more values than the 95% ci in order to be 99% sure that the time spent on email weekly would fall in the confidence interval.
-
-
-# Trump's Approval Margins
-
-
-```{r, trump_approval_margins_data, cache=TRUE}
-# Import approval polls data
-approval_polllist <- read_csv(here::here('data', 'approval_polllist.csv'))
-
-# or directly off fivethirtyeight website
-# approval_polllist <- read_csv('https://projects.fivethirtyeight.com/trump-approval-data/approval_polllist.csv') 
-
-glimpse(approval_polllist)
-
-# Use `lubridate` to fix dates, as they are given as characters.
-```
-
-```{r, converting_to_dates}
-# Use `lubridate` to fix dates, as they are given as characters.
-
-library(lubridate)
-approval_polllist_converted <- approval_polllist %>% 
-  mutate(modeldate = mdy(modeldate),
-         startdate = mdy(startdate), 
-         enddate = mdy(enddate))
-
-approval_polllist_converted
-```
-
-## Create a plot
-
-Calculating the average net approval rate (approve- disapprove) for each week since President Trump got into office.
-
-Image to plot:
-
-```{r trump_margins, echo=FALSE, out.width="100%"}
-knitr::include_graphics(here::here("images", "trump_approval_margin.png"), error = FALSE)
-```
-
-```{r, trump_margins_weekly}
-    
-weekly_net_approval <- approval_polllist_converted %>% filter(subgroup == "Voters") %>% 
-  mutate(net_approval = approve - disapprove,
-         week = isoweek(enddate),
-         year = year(enddate)) %>%
-  group_by(year, week) %>%
-  summarise(mean_weekly_nar = mean(net_approval),
-            sd_weekly_nar = sd(net_approval), 
-            count_weekly_nar = n(),
-            t_distribution=qt(0.975, count_weekly_nar-1),
-            se_weekly_nar = sd_weekly_nar/sqrt(count_weekly_nar),
-            interval_value=t_distribution*se_weekly_nar,
-            low_ci=mean_weekly_nar-interval_value,
-            high_ci=mean_weekly_nar+interval_value) %>% 
-  na.omit()
-
-weekly_net_approval
-```
-
-
-```{r, trump_margins_plot, fig.width=11,fig.height=5.5}
-
-ggplot(weekly_net_approval, aes(x = week, y = mean_weekly_nar, colour=factor(year))) + 
-  facet_wrap(~year) +
-  geom_ribbon(aes(ymin = low_ci, ymax = high_ci, colour=factor(year), fill=factor(year)), alpha=0.15) +
-  scale_x_continuous(breaks = seq(0,53, by = 13), limits = c(0,53)) +
-  scale_y_continuous(breaks = seq(-20,7.5, by = 2.5), limits = c(-21,7.5)) +
-  geom_hline(yintercept=0, color='orange') +
-  geom_point() + 
-  geom_line() +
-  theme(legend.position = "none") +
-  ggtitle("Estimating Net Approval (approve-disapprove) for Donald Trump", subtitle = "Weekly average of all polls") +
-  labs(y="Average Net Approval (%)", x="Week of the year")
-
-```
-
-## Compare Confidence Intervals
-
-Comparing the confidence intervals for `week 15` (6-12 April 2020) and `week 34` (17-23 August 2020).
-
-```{r, CI_comparaison}
-
-ci_wna <- weekly_net_approval %>% 
-  mutate(ci = interval_value * 2)
-
-ci_wna
-
-subset(ci_wna, year==2020 & week==15)$ci
-subset(ci_wna, year==2020 & week==34)$ci
-
-```
-
-
-Apart from the very beginning of 2017, the Trump Approval Rate (TAR) has been consistently negative, characterized by a sensible amount of variability throughout time. The graphs shows that there have been periods in which the estimate of the Average TAR was fairly accurate, with a tight CI (as for the beginning of 2019 or April-May 2020). In other cases, like end of 2017-beginning of 2018, the true Average TAR has been much harder to infer from the data at our disposal. 
-  
-It appears that, with the US presidential elections coming up in November 2020, it will be much harder to know the true Average TAR since the CI in the last 20 weeks has been consistently increasing, thus making the prediction of the TAR mean less certain.
-
-
-# Gapminder revisited
-
-```{r, get_data, cache=TRUE}
-# load gapminder HIV data
-adults_with_hiv_percent_age_15_49 <- read_csv(here::here("data","adults_with_hiv_percent_age_15_49.csv"))
-life_expectancy_years <- read_csv(here::here("data","life_expectancy_years.csv"))
-
-# get World bank data using wbstats
-indicators <- c("SP.DYN.TFRT.IN","SE.PRM.NENR", "SH.DYN.MORT", "NY.GDP.PCAP.KD")
-
-
-library(wbstats)
-
-worldbank_data <- wb_data(country="countries_only", #countries only- no aggregates like Latin America, Europe, etc.
-                          indicator = indicators, 
-                          start_date = 1960, 
-                          end_date = 2016)
-
-# get a dataframe of information regarding countries, indicators, sources, regions, indicator topics, lending types, income levels,  from the World Bank API 
-countries <-  wbstats::wb_cachelist$countries
-
-```
-
-
-1. Relationship between HIV prevalence and life expectancy.
-
-```{r, relationship_between_HIV_and_Life_Expectancy}
-Mutatation_life_expectancy <- life_expectancy_years%>%
-  select(country,"1979":"2011")%>%
-  pivot_longer(cols="1979":"2011",
-               names_to="year",
-               values_to="life_expectancy")
-
-Mutation_HIV_prevalence <- adults_with_hiv_percent_age_15_49%>%
-  select(country,"1979":"2011")%>%
-  pivot_longer(cols="1979":"2011",
-               names_to="year",
-               values_to="HIV_prevalence")
-
-Combined_data<-inner_join(Mutatation_life_expectancy,Mutation_HIV_prevalence,by=c("country","year"))
-Combined_data<-inner_join(countries,Combined_data,by="country")
-
-ggplot(Combined_data, aes(y=life_expectancy,x=HIV_prevalence))+
-    geom_smooth(colour="red")+
-           geom_point(alpha = 0.4, size=0.4)+
-           facet_wrap(~region, scales="free")+
-    labs(title="Relationship between HIV prevalence and life expectancy",y="Life expectancy",x="HIV prevalence") +
-  theme_solarized()
-
-```
-
-Needed to have years as a column because earlier column headers were values not variable names.
-
-2. Relationship between fertility rate and GDP per capita.
-
-```{r, relationship_between_fertility_rate_and_GDP_per_capita}
-
-Combined_data_2 <- inner_join(countries,worldbank_data,by="country")
-
-ggplot(Combined_data_2, aes(x=NY.GDP.PCAP.KD,y=SP.DYN.TFRT.IN))+
-    geom_smooth(colour="red")+
-           geom_point(alpha=0.4, size=0.4)+
-           facet_wrap(~region, scales = "free")+
-    labs(title="Relationship between Fertility rate and GDP per capita",x="GDP per capita",y="Fertility rate") +
-  theme_solarized()
-
-```
-
-
-3. Regions with most observations of missing HIV data.
-
-```{r, missing_HIV_data}
-
-Combined_data_3 <- Combined_data %>%
-    filter(is.na(HIV_prevalence)) %>%
-    group_by(region) %>%
-    summarise(count=count(region))
-    ggplot(Combined_data_3,aes(x=count,y=reorder(region,count)))+
-    geom_col()+
-    geom_text_repel(aes(label = count)) +
-    theme_economist()+
-    labs(title="Number of missing HIV data",x="HIV Missing Data",y="Region")
+Although we are missing 1,004 weight observations out of 13,583 observations, the graph clearly indicates a heavily right skewed distribution of weight amongst high schoolers.The peak is around 63kg, with a leptokurtic curve displaying a small cluster at around 115kg.
 
   
+```{r}
+#new variable `physical_3plus`, which will be `yes` if they are physically active for at least 3 days a week, and `no` otherwise.
+yrbss <- yrbss %>% 
+  mutate(physical_3plus = ifelse(physically_active_7d >= 3, "yes", "no"),
+         physica_3plus_val = ifelse(physical_3plus == "no", 1, 0))
+
+yrbss %>% filter(!is.na(physical_3plus)) %>% 
+  group_by(physical_3plus) %>% 
+  summarise(count = n()) %>% 
+  mutate(prop= count/sum(count))
+
 ```
 
-4. Top 5 countries that have seen the greatest improvement in mortality rates, as well as those 5 countries where mortality rates have had the least improvement or even deterioration.
 
-```{r, mortality_rate, fig.width=12}
+```{r, ci_not_active}
+#95% confidence interval for the population proportion of high schools that are *NOT* active 3 or more days per week
+cleaned_yrbss <- yrbss %>% filter(!is.na(physical_3plus))
 
-cleaned_data_latest <- Combined_data_2 %>% filter(!is.na(SH.DYN.MORT)) %>% group_by(region, country) %>% 
-  top_n(n=1, wt=date) %>% select(region, country, SH.DYN.MORT, date)
+ci_not_active <- cleaned_yrbss %>% 
+  summarise(mean_pop = mean(physica_3plus_val, na.rm = TRUE),
+            sd_pop = sd(physica_3plus_val, na.rm = TRUE),
+            count_pop = n()) %>%
+  mutate(se_pop = sd_pop / sqrt(count_pop),
+         lower_ci = mean_pop - qt(1 - (0.05 / 2), count_pop - 1) * se_pop,
+         upper_ci = mean_pop + qt(1 - (0.05 / 2), count_pop - 1) * se_pop)
 
-cleaned_data_oldest <- Combined_data_2 %>% filter(!is.na(SH.DYN.MORT)) %>% group_by(region, country) %>% 
-  top_n(n=1, wt=-date) %>% select(region, country, SH.DYN.MORT, date)
+ci_not_active
 
-improvement_data <- cleaned_data_latest %>% inner_join(cleaned_data_oldest,
-                                                       by=c("region", "country"),
-                                                       suffix = c("_latest", "_oldest")) %>% 
-  mutate(improvement = -((SH.DYN.MORT_latest - SH.DYN.MORT_oldest)/SH.DYN.MORT_oldest)*100.0) #negative sign because reduction in mortality is actually improvement in mortality
-improvement_data
+```
+Is there a relationship between these two variables? What did you expect and why?
+
+```{r, boxplot}
+
+ggplot(cleaned_yrbss, aes(x=physical_3plus, y=weight)) +
+  geom_boxplot() +
+  labs(title = "",
+       x = "Physical 3 Plus",
+       y = "Weight") + 
+  NULL
+
+```
+The boxplot does not seem to show a marked weight difference between the high schoolers who are physically active more than 3 times a week and those who aren't. We conclude there is no significant correlation for this group of schoolers between the number of times they exercise per week and their weight. Although we were expecting to see a strong positive correlation indicating that the less one exercises the more their weight increases, there actually seems to be a slight negative correlation. This shows a tendency for regular exercisers to gain weight, which probably comes from muscle mass. However, we would need to conduct further research regarding this hypothesis. In summary, weight might not be a reliable predictor of how much a person exercises and how healthy they are. Other factors such as gender or sleeping hours could be worth studying.
 
 
-top_5_improvements_by_region <- improvement_data %>% group_by(region) %>% top_n(n=5, wt=improvement) %>% arrange(region, -improvement)
-top_5_improvements_by_region
+## Confidence Interval
 
-ggplot(top_5_improvements_by_region, aes(x=improvement, y=reorder(country, improvement))) +
-  geom_col() +
-  xlim(0, 100) +
-  facet_wrap(~region, scales = "free") +
-  labs(title="Top 5 countries with highest improvement in mortality rates",
-       subtitle="improvement is calculated by -(latest mortality rate - oldest mortality rate)/oldest mortality rate * 100",
-       x = "Improvement Percent",
-       y = "Country") + 
-  geom_text(aes(label = improvement %>% round(2))) +
-  theme_bw()
+```{r}
+yrbss %>%
+  group_by(physical_3plus) %>%
+  filter(!is.na(physical_3plus)) %>% 
+  summarise(mean_weight = mean(weight, na.rm = TRUE),
+            sd_weight = sd(weight, na.rm=TRUE),
+            count = n(),
+            se_weight = sd_weight/sqrt(count),
+            t_critical = qt(0.975, count-1), 
+            margin_of_error = t_critical * se_weight,
+            lower = mean_weight - t_critical * se_weight,
+            upper = mean_weight + t_critical * se_weight
+            )
 
-bottom_5_improvements_by_region <- improvement_data %>% group_by(region) %>% top_n(n=5, wt=-improvement) %>% arrange(region, improvement)
-bottom_5_improvements_by_region
+```
 
-ggplot(bottom_5_improvements_by_region, aes(x=improvement, y=reorder(country, -improvement))) +
-  geom_col() +
-  xlim(0, 100) +
-  facet_wrap(~region, scales = "free") +
-  labs(title="Bottom 5 countries with lowest improvement in mortality rates",
-       subtitle="improvement is calculated by -(latest mortality rate - oldest mortality rate)/oldest mortality rate * 100",
-       x = "Improvement Percent",
-       y = "Country") + 
-  geom_text(aes(label = improvement %>% round(2))) +
-  theme_bw()
+There is an observed difference of about 1.77kg (68.44 - 66.67), and we notice that the two confidence intervals do not overlap. It seems that the difference is at least 95% statistically significant. Let us also conduct a hypothesis test.
+
+## Hypothesis test with formula
+
+```{r}
+t.test(weight ~ physical_3plus, data = yrbss)
+```
+
+## Hypothesis test with `infer`
+
+
+```{r, test_initialization}
+obs_diff <- yrbss %>%
+  specify(weight ~ physical_3plus) %>%
+  calculate(stat = "diff in means", order = c("yes", "no"))
+
+```
+
+```{r}
+#test simulation from null distribution
+null_dist <- yrbss %>%
+  specify(weight ~ physical_3plus) %>%
+  hypothesize(null = "independence") %>%
+  generate(reps = 1000, type = "permute") %>%
+  calculate(stat = "diff in means", order = c("yes", "no"))
+
+#visualization of test distribution
+ggplot(data = null_dist, aes(x = stat)) +
+  geom_histogram()
+
+```
+
+There seems to be no null permutations that have a difference of at least `obs_stat`.
+
+```{r}
+#p-value calculation
+null_dist %>% visualize() +
+  shade_p_value(obs_stat = obs_diff, direction = "two-sided")
+
+null_dist %>%
+  get_p_value(obs_stat = obs_diff, direction = "two_sided")
+
+```
+
+
+Seeing as the p-value is below 5% at p=0, we conclude our null hypothesis can be rejected. This confirms our previous analysis that high-schooler weight and the number of times a high-schooler exercises are very likely to be unrelated.
+
+# IMDB ratings: Differences between directors
+
+Are the mean IMDB rating for Steven Spielberg and Tim Burton are the same or not? Let's see...
+
+```{r load-movies-data}
+movies <- read_csv(here::here("data", "movies.csv"))
+glimpse(movies)
+```
+
+```{r, intervals_graph}
+
+summary_data <- movies %>% 
+  group_by(director) %>% 
+  filter(director %in% c("Steven Spielberg", "Tim Burton")) %>% 
+  summarise(mean = mean(rating, na.rm = TRUE),
+            sd = sd(rating, na.rm = TRUE),
+            count= n()) %>%
+  mutate(se = sd / sqrt(count),
+         lower_ci = mean - qt(1 - (0.05 / 2), count - 1) * se,
+         upper_ci = mean + qt(1 - (0.05 / 2), count - 1) * se)
+
+summary_data
+
+
+ggplot(summary_data, aes(x=mean, y=reorder(director, mean)))+
+  geom_point(aes(color = director, size = 3))+
+  geom_rect(aes(xmin=max(lower_ci), xmax=min(upper_ci), ymin = -Inf, ymax = +Inf ,alpha = .3))+
+  geom_errorbar(aes(xmin = lower_ci , xmax = upper_ci, width = 0.1, color = director, size = 1.5))+
+  labs(title = "Do Spielberg and Burton have the same IMDB ratings?", subtitle = "95% confidence intervals overlap", y = "", x = "Mean IMDB Rating")+
+  theme_bw()+
+   geom_label(aes(y=reorder(director,mean),x=lower_ci,
+                   label = round(lower_ci,2)),
+                hjust=0.4, vjust=-0.4, fill = NA, label.size = NA)+
+   geom_label(aes(y=reorder(director,mean),x=upper_ci,
+                   label = round(upper_ci,2)),
+                hjust=0.4, vjust=-0.4, fill = NA, label.size = NA)+
+  theme(legend.position = "none")+
+  geom_text(aes(label=round(mean,2), vjust =-2))
+ 
+
+
+
+```
+I have already calculated the confidence intervals for the mean ratings of these two directors and as you can see they overlap. 
+
+
+```{r, t_test}
+#NULL hypothesis : Steven Spielberg's mean IMDB rating = Tim Burton's mean IMDB rating
+
+movies <- movies %>% 
+  filter(director %in% c("Steven Spielberg", "Tim Burton")) %>% 
+  mutate(steven_tim_val = ifelse(director == "Steven Spielberg",1,0))
+
+#glimpsing the means of Tim Burton's ratings (mean in group 0) and Steven Spielberg's ratings (mean in group 1)
+
+t.test(rating ~ steven_tim_val, data = movies)
   
 ```
+The t-test results show that the mean rating for Tim Burton and Steven Spielberg are different, with Steven's rating being higher than Tim Burton's at 7.57 and 6.93 respectively. Although the confidence intervals overlap, we can see that p-value= 0.01 < 0.05 which confirms that the NULL hypothesis can be rejected.
 
-5. Relationship between primary school enrollment and fertility rate.
+```{r, hypothesis_test}
+#getting Tim and Steven data only
+steven_tim <- movies %>% 
+  group_by(director) %>% 
+  filter(director %in% c("Steven Spielberg", "Tim Burton"))
 
-```{r, primary_school_enrollment_and_fertility_rate}
+#assigning numerical values to Steven & Tim
+obs_diff <- movies %>%
+  specify(rating~director) %>%
+  calculate(stat = "diff in means", order = c("Steven Spielberg", "Tim Burton"))
 
-ggplot(Combined_data_2, aes(x=SE.PRM.NENR,y=SP.DYN.TFRT.IN))+
-    geom_smooth(colour="red")+
-           geom_point()+
-    labs(title="Relationship between Fertility rate and Primary school enrollment",x="Primary school enrollment",y="Fertility rate")
-
-ggplot(Combined_data_2, aes(x=SE.PRM.NENR,y=SP.DYN.TFRT.IN))+
-    geom_smooth(colour="red")+
-           geom_point(alpha=0.4, size=0.4)+
-           facet_wrap(~region, scales="free")+
-    labs(title="Relationship between Fertility rate and Primary school enrollment by region",x="Primary school enrollment",y="Fertility rate")
-```
-
-# Challenge 1: CDC COVID-19 Public Use Data
-
-
-```{r, loading_covid_data, cache=TRUE}
-# file contains 11 variables and 3.66m rows and is well over 380Mb. 
-# It will take time to download
-
-# URL link to CDC to download data
-url <- "https://data.cdc.gov/api/views/vbim-akqf/rows.csv?accessType=DOWNLOAD"
-
-covid_data <- vroom::vroom(url)%>% # If vroom::vroom(url) doesn't work, use read_csv(url)
-  clean_names()
-
-
-```
-
-
-1. Graph by age group, sex, and whether the patient had co-morbidities or not
-
-```{r, covid_1, cache=TRUE, fig.width=10}
-
-glimpse(covid_data)
-
-covid_chart1 <- covid_data %>% 
-select(medcond_yn, death_yn, sex, age_group) %>%
-        filter(!medcond_yn %in% c("Missing", "Unknown", "Other", NA),
-               !sex %in% c("Missing", "Unknown", "Other", NA),
-               !age_group %in% c("Missing", "Unknown", "Other", NA),
-               !death_yn %in% c("Missing", "Unknown", "Other", NA)) %>% 
   
-  mutate(medcond_with = ifelse(medcond_yn=="Yes", "With co-morbidities", "Without co-morbidities")) %>% 
-  group_by(age_group, sex, medcond_with) %>% 
-  summarise(death = prop(death_yn, success = "Yes"), label = scales::percent(death %>% round(2)))
+null_dist <- movies %>%
+  specify(rating ~ director) %>%
+  hypothesize(null = "independence") %>%
+  generate(reps = 1000, type = "permute") %>%
+  calculate(stat = "diff in means", order = c("Steven Spielberg", "Tim Burton"))
+
+null_dist %>% visualize() +
+  shade_p_value(obs_stat = obs_diff, direction = "two-sided")
+
+null_dist %>%
+  get_p_value(obs_stat = obs_diff, direction = "two_sided")
+
+```
+Therefore, simulating from a null distribution with an infer package and t-test also show that the p-value is below 5%, indicating we can reject the null hypothesis. Tim Burton and Steven Spielberg are 95% unlikely to have the same mean IMDB rating.
+
+# Omega Group plc- Pay Discrimination
 
 
-ggplot(covid_chart1, aes(x=death, y=age_group)) +
-  geom_col(fill = "blue", alpha = 0.4) +
-  facet_grid(rows= vars(medcond_with), cols= vars(sex)) +
-  ggtitle("COVID Death Rate by Age Group, Sex, and Presence of Co-morbidities") +
-  geom_text_repel(label = covid_chart1$label) +
-  scale_x_continuous(labels = scales::percent) +
-  labs(x = NULL, y = NULL) +
+At the last board meeting of Omega Group Plc., the headquarters of a large multinational company, the issue was raised that women were being discriminated in the company, in the sense that the salaries were not the same for male and female executives. A quick analysis of a sample of 50 employees (of which 24 men and 26 women) revealed that the average salary for men was about 8,700 higher than for women. This seemed like a considerable difference, so it was decided that a further analysis of the company salaries was warranted. 
+
+We will carry out the analysis. The objective is to find out whether there is indeed a significant difference between the salaries of men and women, and whether the difference is due to discrimination or whether it is based on another, possibly valid, determining factor. 
+
+## Loading the data
+
+```{r load_omega_data}
+omega <- read_csv(here::here("data", "omega.csv"))
+glimpse(omega) # examine the data frame
+```
+
+## Relationship Salary - Gender ?
+
+Is there a significant difference between the salaries of the male and female executives? We shall see...
+
+```{r, confint_single_valiables}
+# Summary Statistics of salary by gender
+mosaic::favstats (salary ~ gender, data=omega)
+
+# Dataframe with two rows (male-female) and having as columns gender, mean, SD, sample size, 
+# the t-critical value, the standard error, the margin of error, 
+# and the low/high endpoints of a 95% condifence interval
+omega_summarized <- omega %>% 
+  
+  # grouping by gender
+  group_by(gender) %>% 
+  
+  # summarizing
+  summarize(mean_gender = mean(salary), 
+            count_gender = n(), 
+            sd_gender = sd(salary), 
+            t_crit = qt(1 - (0.05/2),count_gender - 1), 
+            se_gender = sd_gender/sqrt(count_gender), 
+            moe_gender = se_gender * t_crit, 
+            upper_ci_gender = mean_gender + t_crit * se_gender, 
+            lower_ci_gender = mean_gender - t_crit * se_gender)
+
+# showing the result
+omega_summarized
+
+```
+
+There appears to be more variability within the sample for female salaries. In fact, the CI is larger as well as the margin of error and standard deviation.
+The t critical for females is lower as well, even though the sample size is larger for females than for men. This reinforces the idea that the salaries of female workers selected vary more than those of men for this sample.
+
+Hypothesis testing; null hypothesis being that the mean difference in salaries is zero, or that, on average, men and women make the same amount of money:
+```{r, hypothesis_testing}
+# hypothesis testing using t.test() 
+t.test(salary ~ gender, omega)
+```
+```{r, infer_package}
+# hypothesis testing using infer package
+infer_hypo_salary <- omega %>%
+  
+  # specifing the variables
+  specify(salary ~ gender) %>%
+  
+  # creating the null distribution
+  hypothesize(null = "independence") %>%
+  
+  # generating 1000 simulated samples
+  generate(reps = 1000, type = "permute") %>%
+  
+  # finding the delta between the means of samples
+  calculate(stat = "diff in means", order = c("female", "male"))
+
+# visualizing the result
+ggplot(infer_hypo_salary, aes(x = stat)) +
+  geom_histogram() +
+  labs(title = 'Distribution of the average difference in salary between women and men', x = 'Average salary of women - Average salary of men') +
+  NULL
+```
+
+The distribution seems to highlight the fact that the difference might be statistically relevant. Both hypotesis test suggest that women consistently earn less than men on average. We can see this from the 95% CI produced in the first test. The CI does not include 0, thus the difference is mostly likely meaningful.
+
+## Relationship Experience - Gender?
+
+At the board meeting, someone raised the issue that there was indeed a substantial difference between male and female salaries, but that this was attributable to other reasons such as differences in experience. A questionnaire send out to the 50 executives in the sample reveals that the average experience of the men is approximately 21 years, whereas the women only have about 7 years experience on average (see table below).
+
+```{r, experience_stats}
+# Summary Statistics of salary by gender
+favstats (experience ~ gender, data=omega)
+
+```
+```{r, salary_experience_ttest}
+
+# perform t-test to verify the hypothesis
+t.test(experience ~ gender, omega)
+
+```
+```{r, salary_experience_ttest_infer}
+
+# perform t-test (with infer) to verify the hypothesis
+infer_hypo_experience <- omega %>%
+  
+  # specifying the variables
+  specify(experience ~ gender) %>%
+  
+  # creating the null distribution
+  hypothesize(null = "independence") %>%
+  
+  # generating 1000 simulated samples
+  generate(reps = 1000, type = "permute") %>%
+  
+  # finding the delta between the means of samples
+  calculate(stat = "diff in means", order = c("female", "male"))
+
+# visualizing the result
+ggplot(infer_hypo_experience, aes(x = stat)) +
+  geom_histogram() +
+  labs(title = 'Distribution of the average difference in experience between women and men', x = 'Average experience of women - Average experience of men') +
+  NULL
+
+```
+
+It is possible to conclude that there is in fact a sensible difference between the experience of the two groups. The Ci in the first test does not include 0 and the second test conferms the findings of the first one.
+This result might undermine the considerations done before since the difference in salary might be attributable to differences in experiences rather than in gender.
+
+## Relationship Salary - Experience ?
+
+Someone at the meeting argues that clearly, a more thorough analysis of the relationship between salary and experience is required before any conclusion can be drawn about whether there is any gender-based salary discrimination in the company.
+
+```{r, salary_exp_scatter}
+
+# plotting the scatterplot
+ggplot(omega, aes(x = experience, y = salary)) +
+  geom_point() +
+  geom_smooth(method=lm) +
+  labs(title = 'Plot of the relationship between salary and experience', x = 'experience', y = 'salary\n') +
+  NULL
+
+# creating the scatterplot, differentiating the points for gender
+ggplot(omega, aes(x = experience, y = salary, color = gender)) +
+  geom_point() +
+  geom_smooth(method=lm) +
+  labs(title = 'Plot of the relationship between salary and experience, grouped by gender', x = 'experience', y = 'salary\n') +
+  NULL
+
+```
+
+There seems to be a meaningful relationship between experience and salary, both for men and women. The linear regression line is upward sloping for both groups, signalling that individuals with more experience will be paid more. The 95% CI are quite wide in the plot with the two separate regression. Obviously the smaller number of observations impacts the CI.
+
+## Check correlations between the data
+
+```{r, ggpairs}
+omega %>% 
+  select(gender, experience, salary) %>% #order variables they will appear in ggpairs()
+  ggpairs(aes(colour=gender, alpha = 0.3))+
   theme_bw()
 ```
+In addition to the comment made above, the relationship between these two variables seems to to be of positive correlation. As experience grow, salary does as well. Women tend to have less experience and thus their average salary is lower.
 
-2. Graph by age group, sex, and whether the patient was admited to Intensive Care Unit (ICU) or not.
-
-```{r, covid_2, cache=TRUE, fig.width=10}
-covid_chart2 <- covid_data %>% 
-select(icu_yn, death_yn, sex, age_group) %>% na.omit() %>% 
-        filter(!icu_yn %in% c("Missing", "Unknown", "Other", NA),
-               !sex %in% c("Missing", "Unknown", "Other", NA),
-               !age_group %in% c("Missing", "Unknown", "Other", NA),
-               !death_yn %in% c("Missing", "Unknown", "Other", NA)) %>% 
-  
-  mutate(in_icu = ifelse(icu_yn=="Yes", "Admitted to ICU", "No ICU")) %>% 
-  group_by(age_group, sex, in_icu) %>% 
-  summarise(death = prop(death_yn, success = "Yes"), label = scales::percent(death %>% round(2)))
+# Challenge 1: Yield Curve inversion
 
 
-ggplot(covid_chart2, aes(x=death, y=age_group)) +
-  geom_col(fill = "orange", alpha = 0.4) +
-  facet_grid(rows= vars(in_icu), cols= vars(sex))+
-  ggtitle("Death Rate by Age Group, Sex, and ICU Admission") +
-  geom_text_repel(label = covid_chart2$label) +
-  scale_x_continuous(labels = scales::percent) +
-  labs(x=NULL, y=NULL) +
-  theme_bw()
+```{r yield_curve_parable.jpg, echo=FALSE, out.width="100%"}
+knitr::include_graphics(here::here("images", "yield_curve_parable.jpg"), error = FALSE)
 ```
 
 
-```{r covid_challenge, out.width="100%"}
-knitr::include_graphics(here::here("images", "covid_death_rate_comorbidities.png"), error = FALSE)
-knitr::include_graphics(here::here("images", "covid_death_rate_icu.png"), error = FALSE)
+In our case we will look at US data and use the [FRED database](https://fred.stlouisfed.org/) to download historical yield curve rates, and plot the yield curves since 1999 to see when the yield curves flatten. 
+
+```{r yield_curve_challenge, echo=FALSE, out.width="100%"}
+knitr::include_graphics(here::here("images", "yield_curve_challenge.png"), error = FALSE)
 ```
 
 
+First, we will use the `tidyquant` package to download monthly rates for different durations. 
 
+```{r get_rates, warning=FALSE}
+# Get a list of FRED codes for US rates and US yield curve; choose monthly frequency
+# to see, eg., the 3-month T-bill https://fred.stlouisfed.org/series/TB3MS
+tickers <- c('TB3MS', # 3-month Treasury bill (or T-bill)
+             'TB6MS', # 6-month
+             'GS1',   # 1-year
+             'GS2',   # 2-year, etc....
+             'GS3',
+             'GS5',
+             'GS7',
+             'GS10',
+             'GS20',
+             'GS30')  #.... all the way to the 30-year rate
 
-# Challenge 2: Excess rentals in TfL bike sharing
+# Turn  FRED codes to human readable variables
+myvars <- c('3-Month Treasury Bill',
+            '6-Month Treasury Bill',
+            '1-Year Treasury Rate',
+            '2-Year Treasury Rate',
+            '3-Year Treasury Rate',
+            '5-Year Treasury Rate',
+            '7-Year Treasury Rate',
+            '10-Year Treasury Rate',
+            '20-Year Treasury Rate',
+            '30-Year Treasury Rate')
 
-```{r, get_tfl_data, cache=TRUE}
-url <- "https://data.london.gov.uk/download/number-bicycle-hires/ac29363e-e0cb-47cc-a97a-e216d900a6b0/tfl-daily-cycle-hires.xlsx"
+maturity <- c('3m', '6m', '1y', '2y','3y','5y','7y','10y','20y','30y')
 
-# Download TFL data to temporary file
-httr::GET(url, write_disk(bike.temp <- tempfile(fileext = ".xlsx")))
+# by default R will sort these maturities alphabetically; but since we want
+# to keep them in that exact order, we recast maturity as a factor 
+# or categorical variable, with the levels defined as we want
+maturity <- factor(maturity, levels = maturity)
 
-# Use read_excel to read it as dataframe
-bike0 <- read_excel(bike.temp,
-                   sheet = "Data",
-                   range = cell_cols("A:B"))
+# Create a lookup dataset
+mylookup<-data.frame(symbol=tickers,var=myvars, maturity=maturity)
+# Take a look:
+mylookup %>% 
+  knitr::kable()
 
-# change dates to get year, month, and week
-bike <- bike0 %>% 
-  clean_names() %>% 
-  rename (bikes_hired = number_of_bicycle_hires) %>% 
-  mutate (year = year(day),
-          month = lubridate::month(day, label = TRUE),
-          week = isoweek(day))
+df <- tickers %>% tidyquant::tq_get(get="economic.data", 
+                   from="1960-01-01")   # start from January 1960
+
+glimpse(df)
 ```
 
+Our dataframe `df` has three columns (variables):
+
+- `symbol`: the FRED database ticker symbol
+- `date`: already a date object
+- `price`: the actual yield on that date
+
+The first thing would be to join this dataframe `df` with the dataframe `mylookup` so we have a more readable version of maturities, durations, etc.
 
 
-Create a facet grid that plots bikes hired by month and year.
+```{r join_data, warning=FALSE}
 
-```{r tfl_month_year_grid, echo=FALSE, out.width="100%"}
-knitr::include_graphics(here::here("images", "tfl_distributions_monthly.png"), error = FALSE)
+yield_curve <-left_join(df,mylookup,by="symbol") 
+yield_curve
 ```
 
-First few months of 2020 (Jan-Mar) look similar to previous years, but after that because of COVID, the variations (std deviation) is quite high as the curve is very wide.
+## Plotting the yield curve
 
-Reproduce the following two graphs.
+### Yields on US rates by duration since 1960
 
-```{r tfl_absolute_monthly_change, out.width="100%"}
-knitr::include_graphics(here::here("images", "tfl_monthly.png"), error = FALSE)
+```{r yield_curve_1, echo=FALSE, out.width="100%"}
+knitr::include_graphics(here::here("images", "yield_curve1.png"), error = FALSE)
 ```
 
-```{r, monthly_changes_in_tfl_bikes, fig.height = 8, fig.width = 10}
+```{r}
 
-glimpse(bike)
+# Factoring so as to have the order of Rates in facet_wrap
 
-expected_rentals_per_month_tbl <- bike %>% filter(year %in% c(2015, 2016, 2017, 2018, 2019)) %>% group_by(month) %>% 
-  summarise(expected_rentals = mean(bikes_hired))
+yield_curve$var_f <- factor(yield_curve$var,
+  levels=c("3-Month Treasury Bill", "6-Month Treasury Bill", "1-Year Treasury Rate",
+           "2-Year Treasury Rate", "3-Year Treasury Rate", "5-Year Treasury Rate",
+           "7-Year Treasury Rate", "10-Year Treasury Rate", "20-Year Treasury Rate",
+           "30-Year Treasury Rate"))
 
-expected_rentals_per_month_tbl
+#Plotting the curve using facet_wrap and ggplot
 
-monthly_data <- bike %>% filter(year %in% c(2015, 2016, 2017, 2018, 2019, 2020)) %>%  group_by(year, month) %>% 
-  summarise(actual_rentals = mean(bikes_hired)) %>% full_join(expected_rentals_per_month_tbl, by = "month") %>% 
-  mutate(excess_rentals = actual_rentals-expected_rentals)
-
-monthly_data
-
-
-ggplot(monthly_data, aes(x=month, y=actual_rentals, group=year)) +
+yield_curve %>% 
+  ggplot(aes(x=date, y=price, colour=var_f))+
   geom_line()+
-  geom_line(aes(y=expected_rentals), color="blue") +
-  facet_wrap(~year, nrow=2) +
-  geom_ribbon(aes(ymin = ifelse(excess_rentals >= 0, expected_rentals, actual_rentals),
-                  ymax = actual_rentals), alpha=0.2, fill="green") +
-  geom_ribbon(aes(ymin = ifelse(excess_rentals >= 0, expected_rentals, actual_rentals),
-                  ymax = expected_rentals), alpha=0.2, fill="red") +
-  labs(title = "Monthly changes in Tfl Bike rentals",
-       subtitle = "Change from monthly average shown in blue and calculated between 2015-2019",
-       y = "Bike Rentals",
+  theme_bw()+
+  facet_wrap(.~ var_f, ncol = 2) +
+  theme(legend.position = "none",
+        axis.title.x = element_blank())+
+  labs(title = "Yields on U.S. Treasury rates since 1960",
+       y = "%",
+       caption = "Source St. Louis Federal Reserve Economic Database (FRED)")
+
+
+
+```
+
+
+### Monthly yields on US rates by duration since 1999 on a year-by-year basis
+
+
+```{r yield_curve_2, echo=FALSE, out.width="100%"}
+knitr::include_graphics(here::here("images", "yield_curve2.png"), error = FALSE)
+```
+
+```{r}
+
+yield_curve %>% 
+  mutate(facet_year = year(ymd(date)), facet_month = month(ymd(date))) %>%
+  filter(facet_year >=1999) %>% #filtering for the year>1999
+  ggplot(aes(x=maturity, y=price, color = factor(facet_year),group = factor(facet_month))) +
+  geom_line() +
+  theme_bw()+
+  facet_wrap(~facet_year, ncol = 4) +
+  labs(x="Maturity", y="Yield(%)", title="US Yield Curve",caption="Source: St Louis Federal Reserve Economic Database (FRED)") +
+  theme(legend.position = "none", axis.text.x = element_text(size = 6)) #changing the size of x-axis labels
+
+
+
+```
+
+
+### 3-month and 10-year yields since 1999
+
+```{r yield_curve_3, echo=FALSE, out.width="100%"}
+knitr::include_graphics(here::here("images", "yield_curve3.png"), error = FALSE)
+```
+
+```{r yield_curve_3_solution, fig.width=12}
+
+cols <- c('date', 'var', 'price') #creating a vector of columns which we need
+
+yield_3mon_10yr_1999 <- yield_curve[, cols] %>% 
+  filter(var %in% c('3-Month Treasury Bill', '10-Year Treasury Rate') & year(date) >= 1999) %>% 
+  pivot_wider(names_from = var, values_from = price) #filtering the columns we need and pivoting wider to have 3-Month Treasury Bill and 10-year Treasury Rate as columns
+
+yield_3mon_10yr_1999
+
+#Plotting using ggplot, and using scale_color_manual to match the colors
+ggplot(yield_3mon_10yr_1999, aes(x=date)) +
+  geom_line(aes(y=`3-Month Treasury Bill`, color="3-Month Treasury Bill")) +
+  geom_line(aes(y=`10-Year Treasury Rate`, color="10-Year Treasury Rate")) +
+  labs(title = "Yields on 30month and 10-year Treasury rates since 1999",
+       x = "",
+       y = "%",
+       color="") +
+  scale_color_manual(values = c("3-Month Treasury Bill" = "red", "10-Year Treasury Rate" = "green"))
+
+
+```
+
+
+According to [Wikipedia's list of recession in the United States](https://en.wikipedia.org/wiki/List_of_recessions_in_the_United_States), since 1999 there have been two recession in the US: between Mar 2001–Nov 2001 and between Dec 2007–June 2009. Does the yield curve seem to flatten before these recessions? Can a yield curve flattening really mean a recession is coming in the US? Since 1999, when did short-term (3 months) yield more than longer term (10 years) debt?
+
+
+Yield curve seems to be flattened before both of these recessions. We can see that in year 2000, and year 2006, yield curve looks like a straight line. Looking at the historical yield curves, we can say that yield curve flattening can hint us about an upcoming recession (or the reason could be similar to Yield Curve Parable). In fact, before 2020 also, yield curve started flattening which hinted about a recession, although recession occurred for a very different reason.
+
+Short-term (3 months) yield more than longer term (10 years) debt during 2000, 2007, and very recently in 2020. This happened during the recession when investors start investing in short term safe treasuries. 
+
+
+- For the first, the code below creates a dataframe with all US recessions since 1946
+
+```{r setup_US-recessions, warning=FALSE}
+
+# get US recession dates after 1946 from Wikipedia 
+# https://en.wikipedia.org/wiki/List_of_recessions_in_the_United_States
+
+recessions <- tibble(
+  from = c("1960-04-01", "1969-12-01", "1973-11-01", "1980-01-01","1981-07-01", "1990-07-01", "2001-03-01", "2007-12-01"),  
+  to = c("1961-02-01", "1970-11-01", "1975-03-01", "1980-07-01", "1982-11-01", "1991-03-01", "2001-11-01", "2009-06-01") 
+  )  %>% 
+  mutate(From = ymd(from), 
+         To=ymd(to),
+         duration_days = To-From)
+
+recessions
+```
+
+
+
+```{r, challenge_1_spread_recession, fig.width=12}
+
+yield_3mon_10yr <- yield_curve[, cols] %>% 
+  filter(var %in% c('3-Month Treasury Bill', '10-Year Treasury Rate')) %>% 
+  pivot_wider(names_from = var, values_from = price) #filtering the columns we need and pivoting wider to have 3-Month Treasury Bill and 10-year Treasury Rate as columns
+
+yield_spread <- yield_3mon_10yr %>% 
+  mutate(spread = `10-Year Treasury Rate` - `3-Month Treasury Bill`) #calculating the spread
+
+
+# vector to create specific labels on x-axis
+break.vec <- c(as.Date("1959-01-01"),
+               seq(from = as.Date("1959-01-01"), to = as.Date("2023-01-01"),
+                 by = "2 years"),
+               as.Date("2023-01-01"))
+
+ggplot(yield_spread, aes(x=date, y=spread)) +
+  geom_rect(data = recessions, inherit.aes = FALSE,
+            aes(xmin = From,
+                xmax = To,
+                ymin = min(yield_spread$spread) - 0.5,
+                ymax = max(yield_spread$spread) + 0.5), 
+            show.legend = FALSE,
+            alpha = 0.8, 
+            fill = "grey") + # To plot rectangle grey lines
+  geom_line(aes(y=spread), color="black") +
+  geom_hline(yintercept = 0) + # to have horizontal line
+  geom_ribbon(aes(ymin = 0, ymax = ifelse(spread >= 0, spread, 0)),
+              alpha = 0.15, fill = "blue") + # to have red, green ribbons
+  geom_ribbon(aes(ymin = ifelse(spread < 0, spread, 0),
+                  ymax = 0), alpha = 0.15, fill = "red") +
+  geom_rug(aes(color = ifelse(yield_spread$spread >= 0, ">=0", "<0"), alpha = 0.15), sides="b", show.legend = FALSE) +
+  scale_colour_manual(values=c(">=0" = "blue","<0" = "red"), guide=FALSE) +
+  scale_x_date(labels = date_format("%Y"), breaks = break.vec) +
+  scale_y_continuous(breaks = seq(-2.5,2.5, by = 2.5)) +
+  labs(title = "Yield Curve Inversion: 10-year minus 3-month U.S. Treasury rates",
+       subtitle = "Difference in % points, monthly averages.\nShaded areas correspond to recessions",
+       y = "Difference (10 year-3 month) yield in %",
        x = NULL) +
   theme_bw() +
   NULL
@@ -819,61 +738,156 @@ ggplot(monthly_data, aes(x=month, y=actual_rentals, group=year)) +
 ```
 
 
-The second one looks at percentage changes from the expected level of weekly rentals. The two grey shaded rectangles correspond to the second (weeks 14-26) and fourth (weeks 40-52) quarters.
 
-```{r tfl_percent_change, out.width="100%"}
-knitr::include_graphics(here::here("images", "tfl_weekly.png"), error = FALSE)
+
+# Challenge 2:GDP components over time and among countries
+
+At the risk of oversimplifying things, the main components of gross domestic product, GDP are personal consumption (C), business investment (I), government spending (G) and net exports (exports - imports). 
+
+The GDP data we will look at is from the [United Nations' National Accounts Main Aggregates Database](https://unstats.un.org/unsd/snaama/Downloads), which contains estimates of total GDP and its components for all countries from 1970 to today.
+
+
+```{r read_GDP_data}
+
+library(readxl)
+
+UN_GDP_data  <-  read_excel(here::here("data", "Download-GDPconstant-USD-countries.xls"), # Excel filename
+                sheet="Download-GDPconstant-USD-countr", # Sheet name
+                skip=2) # Number of rows to skip
+glimpse(UN_GDP_data)
+```
+
+ The first thing we need to do is to tidy the data, as it is in wide format and you must make it into long, tidy format. Please express all figures in billions (divide values by `1e9`, or $10^9$), and you want to rename the indicators into something shorter.
+
+
+```{r reshape_GDP_data}
+
+library(tidyr)
+tidy_GDP_data  <-  UN_GDP_data %>% 
+                     pivot_longer(cols=4:51,            #collapse years into 1 column
+                                  names_to="year",
+                                  values_to="value") %>% 
+                     pivot_wider(names_from="IndicatorName",  #put indicators into columns to rename them
+                                 values_from="value") 
+
+tidy_GDP_data <- tidy_GDP_data %>%          #rename indicators
+                  rename("Household expenditure" = "Household consumption expenditure (including Non-profit institutions serving households)",
+                  "Government expenditure"="General government final consumption expenditure",
+                  "Exports"="Exports of goods and services",
+                  "Imports"="Imports of goods and services",
+                  "GFC" = "Gross fixed capital formation (including Acquisitions less disposals of valuables)",
+                  "Agriculture"="Agriculture, hunting, forestry, fishing (ISIC A-B)",
+                  "Mining"="Mining, Manufacturing, Utilities (ISIC C-E)",
+                  "Manufacturing"="Manufacturing (ISIC D)",
+                  "Construction"="Construction (ISIC F)",
+                  "Wholesale"="Wholesale, retail trade, restaurants and hotels (ISIC G-H)",
+                  "Transport"="Transport, storage and communication (ISIC I)",
+                  "Other"="Other Activities (ISIC J-P)",
+                  "Inventory"="Changes in inventories")
+
+
+tidy_GDP_data <- tidy_GDP_data %>%          #put indicators back in a single column
+                  pivot_longer(cols=4:20,
+                  names_to="IndicatorName",
+                  values_to="value") 
+
+
+tidy_GDP_data$value <- tidy_GDP_data$value/1e9   #express numbers in billions
+                    
+tidy_GDP_data <- tidy_GDP_data %>%
+                  pivot_wider(names_from="IndicatorName",values_from="value")
+
+# Let us compare GDP components for these 3 countries
+country_list <- c("United States","India", "Germany")
+```
+
+
+```{r gdp1, echo=FALSE, out.width="100%"}
+knitr::include_graphics(here::here("images", "gdp1.png"), error = FALSE)
+```
+```{r, fig.width=12}
+indicatorlist <- c("GFC", "Exports", "Government expenditure", "Household expenditure", "Imports", "Gross Domestic Product (GDP)")
+
+GDP_components <- tidy_GDP_data %>%
+  filter(Country %in% country_list)%>%
+  select (Country, year, indicatorlist)
+
+
+ggplot(GDP_components, aes(x=year, group=Country)) +
+  geom_line(aes(y=GFC, color="GFC")) +
+  geom_line(aes(y=Exports, color="Exports")) +
+  geom_line(aes(y=`Government expenditure`, color="Government Expenditure")) +
+  geom_line(aes(y=`Household expenditure`, color="Household expenditure")) +
+  geom_line(aes(y=Imports, color="Imports")) +
+  facet_wrap(~Country, ncol = 3) +
+  scale_x_discrete(breaks = seq(1970, 2010, by = 10)) +
+  labs(title = "GDP Components Over Time", subtitle = "In Constant 2010 USD",
+       y="Billion US$", color="Components of GDP") +
+  theme(axis.text.x = element_text(size = 10)) #changing the size of x-axis labels
+
+
+```
+
+
+GDP is the sum of Household Expenditure (Consumption *C*), Gross Capital Formation (business investment *I*), Government Expenditure (G) and Net Exports (exports - imports).
+
+> What is the % difference between what you calculated as GDP and the GDP figure included in the dataframe?
+
+Absolute differences are not large and mostly between 5%. Possible explanations for differences could be reclassification and double-counting, use of different sources, and pure human errors.  
+
+```{r}
+
+GDP_cal <- tidy_GDP_data %>%
+  filter(Country %in% country_list) %>%
+  select (Country, year, indicatorlist) %>% 
+  group_by(Country, year) %>% 
+  summarize(sum_gdp = sum(GFC, Exports, `Government expenditure`, `Household expenditure`, -Imports), gdp = `Gross Domestic Product (GDP)`, precent_diff = abs((sum_gdp - `Gross Domestic Product (GDP)`)/`Gross Domestic Product (GDP)`*100)) %>%
+
+
+print(GDP_cal)
+
+```
+
+```{r, fig.width=12}
+gdp_max = max(GDP_cal$sum_gdp) * 1.1;
+diff_scale = (gdp_max/10); #(gdp_max/20);
+diff_shift_up = 0; # gdp_max*3/5;
+ggplot(GDP_cal, aes(x=year, group=Country)) +
+  geom_histogram(stat='identity', fill=NA, aes(y=precent_diff*diff_scale+diff_shift_up, color="Diff (%)")) +
+  geom_line(aes(y=sum_gdp, color="GDP Calculated")) +
+  geom_line(aes(y=gdp, color="GDP in Dataframe")) +
+  facet_wrap(~Country, ncol = 3) +
+  scale_x_discrete(breaks = seq(1970, 2010, by = 10)) +
+  scale_y_continuous(
+    name="Billion US$",
+    # Add a second axis and specify its features
+    sec.axis = sec_axis(~(.-diff_shift_up)/diff_scale, name="Diff (%)", breaks = seq(0,10,1))
+  ) +
+  labs(title = "Comparison Between Calculated GDP and GDP in Dataframe", subtitle = "In Constant 2010 USD",
+       y="Billion US$", color="GDP by Source")
+
 ```
 
 
 
-```{r, weekly_change_in_tfl_bikes, fig.height = 8, fig.width = 10}
-
-expected_rentals_per_week_tbl <- bike %>% filter(year %in% c(2015, 2016, 2017, 2018, 2019)) %>% group_by(week) %>% 
-  summarise(expected_rentals = mean(bikes_hired))
-
-expected_rentals_per_week_tbl
-
-weekly_data <- bike %>% filter(year %in% c(2015, 2016, 2017, 2018, 2019, 2020)) %>%  group_by(year, week) %>% 
-  summarise(actual_rentals = mean(bikes_hired)) %>% full_join(expected_rentals_per_week_tbl, by = "week") %>% 
-  mutate(excess_rentals_percent = (actual_rentals-expected_rentals)/expected_rentals,
-         color_id = ifelse(excess_rentals_percent >= 0, ">=0", "<0"))
-
-weekly_data
 
 
-ggplot(weekly_data, aes(x=week, y=excess_rentals_percent, group=year)) +
-  geom_rect(aes(xmin=14, xmax=26, ymin=-0.6, ymax=0.6), show.legend = FALSE, alpha = 0.2, fill = "grey") +
-  geom_rect(aes(xmin=40, xmax=52, ymin=-0.6, ymax=0.6), show.legend = FALSE, alpha = 0.2, fill = "grey") +
-  geom_line(aes(y=excess_rentals_percent), color="black") +
-  facet_wrap(~year, nrow=2) +
-  geom_ribbon(aes(ymin = 0, ymax = ifelse(excess_rentals_percent >= 0, excess_rentals_percent, 0)),
-              alpha=0.2, fill="green") +
-  geom_ribbon(aes(ymin = ifelse(excess_rentals_percent < 0, excess_rentals_percent, 0),
-                  ymax = 0), alpha=0.2, fill="red") +
-  
-  scale_fill_gradient(low = "white",high = "grey", limits=c(0,1)) +
-  geom_rug(aes(color = color_id), sides="b", show.legend = FALSE) +
-  scale_colour_manual(values=c("#CB454A","#7DCD85"), name="Actual vs Expected ", guide=FALSE) +
-  scale_x_continuous(breaks = seq(0,53, by = 13)) +
-  scale_y_continuous(labels = scales::percent) +
-  labs(title = "Weekly changes in Tfl Bike rentals",
-       subtitle = "%age change from weekly averages calculated between 2015-2019",
-       y = NULL,
-       x = NULL) +
-  theme_bw() +
-  NULL
-
-
+```{r gdp2, echo=FALSE, out.width="100%"}
+knitr::include_graphics(here::here("images", "gdp2.png"), error = FALSE)
 ```
 
 
-I have used 'mean' here because then my chart matches with the image, but I'd have preferred to use median because mean gets distorted due to outliers while median doesn't.
 
+> What is this last chart telling you? Can you explain in a couple of paragraphs the different dynamic among these three countries? 
+
+Starting with Germany, it saw an increase in net exports while other GDP drivers either remained stagnant or slightly dropped. This coincides with the nature of the German economy - mature and international trade-centric. As for India, a fast-growing emerging economy, it saw gross capital formation increase dramatically in the last 20 years, mirroring the significant drop in household consumption in that the country collectively saves up more and invest in the future. Finally, in the USA, the key growth driver is household consumption. The USA is large, mature economy and the economy is therefore highly dependent on consumption as shown in the components breakdown in the chart.
 
 
 # Details
 
 - Who did you collaborate with: DEEPAK GUNEJA, WARREN HU, JUSTINE VEYRENC, RICCARDO PERSICO, ALEX SKLAVOUNOS, CHENYING LI
 - Approximately how much time did you spend on this problem set: 20 hours
-- What, if anything, gave you the most trouble: Replicating images
+- What, if anything, gave you the most trouble: Nothing
+
+
+
