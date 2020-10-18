@@ -107,7 +107,7 @@ disqusShortname = ""
       title = "Homework 3"
       subtitle = "10/11/2020"
       image = "pic03.jpg"
-      url = "projects"
+      url = "projects/project3"
 
     [[params.tiles.showcase]]
       title = "Final Group Project"
