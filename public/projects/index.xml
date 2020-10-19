@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Projects on Warren&#39;s Portfolio Website</title>
+    <link>/projects/</link>
+    <description>Recent content in Projects on Warren&#39;s Portfolio Website</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Mon, 19 Oct 2020 00:00:00 +0000</lastBuildDate><atom:link href="/projects/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Final Group Project</title>
+      <link>/projects/project4/</link>
+      <pubDate>Mon, 19 Oct 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/projects/project4/</guid>
+      <description>Rio
+Exploratory Data AnalysisData variableslistings &amp;lt;- vroom(&amp;quot;http://data.insideairbnb.com/brazil/rj/rio-de-janeiro/2020-06-19/data/listings.csv.gz&amp;quot;)glimpse(listings)## Rows: 35,731## Columns: 106## $ id &amp;lt;dbl&amp;gt; 17878, 21280, 25026, 3...## $ listing_url &amp;lt;chr&amp;gt; &amp;quot;https://www.airbnb.co...## $ scrape_id &amp;lt;dbl&amp;gt; 2.02e+13, 2.02e+13, 2....## $ last_scraped &amp;lt;date&amp;gt; 2020-06-19, 2020-06-1...## $ name &amp;lt;chr&amp;gt; &amp;quot;Very Nice 2Br in Copa...## $ summary &amp;lt;chr&amp;gt; &amp;quot;Discounts for long te...## $ space &amp;lt;chr&amp;gt; &amp;quot;- Beautiful, sunny 2 .</description>
+    </item>
+    
+    <item>
+      <title>Session 2: Homework 1</title>
+      <link>/projects/project1/</link>
+      <pubDate>Mon, 19 Oct 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/projects/project1/</guid>
+      <description>Where Do People Drink The Most Beer, Wine And Spirits?library(fivethirtyeight)data(drinks)Drinks data has multiple variable types which include characters (country), integers(beer_servings, spirit_servings, wine_servings) and double(total_litres_of_pure_alcohol, in decimal format). There are no missing values (n_missing=0).
+glimpse(drinks)## Rows: 193## Columns: 5## $ country &amp;lt;chr&amp;gt; &amp;quot;Afghanistan&amp;quot;, &amp;quot;Albania&amp;quot;, &amp;quot;Algeria&amp;quot;, &amp;quot;...## $ beer_servings &amp;lt;int&amp;gt; 0, 89, 25, 245, 217, 102, 193, 21, 261...## $ spirit_servings &amp;lt;int&amp;gt; 0, 132, 0, 138, 57, 128, 25, 179, 72, .</description>
+    </item>
+    
+    <item>
+      <title>Session 4: Homework 2</title>
+      <link>/projects/project2/</link>
+      <pubDate>Mon, 19 Oct 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/projects/project2/</guid>
+      <description>Climate change and temperature anomaliesLoading the file:
+weather &amp;lt;- read_csv(&amp;quot;https://data.giss.nasa.gov/gistemp/tabledata_v3/NH.Ts+dSST.csv&amp;quot;, skip = 1, na = &amp;quot;***&amp;quot;)Selecting the year and the twelve month variables from the weather dataset, and converting the dataframe from wide to ‘long’ format.
+glimpse(weather)## Rows: 140## Columns: 19## $ Year &amp;lt;dbl&amp;gt; 1880, 1881, 1882, 1883, 1884, 1885, 1886, 1887, 1888, 1889, 1...## $ Jan &amp;lt;dbl&amp;gt; -0.54, -0.19, 0.22, -0.59, -0.23, -1.</description>
+    </item>
+    
+    <item>
+      <title>Session 6: Homework 3</title>
+      <link>/projects/project3/</link>
+      <pubDate>Mon, 19 Oct 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/projects/project3/</guid>
+      <description>Youth Risk Behavior SurveillanceEvery two years, the Centers for Disease Control and Prevention conduct the Youth Risk Behavior Surveillance System (YRBSS) survey, where it takes data from high schoolers (9th through 12th grade), to analyze health patterns. We selected group of variables from a random sample of observations during one of the years the YRBSS was conducted.
+Load the datadata(yrbss)glimpse(yrbss)## Rows: 13,583## Columns: 13## $ age &amp;lt;int&amp;gt; 14, 14, 15, 15, 15, 15, 15, 14, 15, 15, 15.</description>
+    </item>
+    
+  </channel>
+</rss>

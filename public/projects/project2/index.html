@@ -1,0 +1,1072 @@
+<!DOCTYPE HTML>
+<html>
+
+    <head>
+	<meta charset="utf-8" />
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+	<meta name="description" content="Hi, Welcome!">
+	<meta name="author" content="Warren">
+	<meta name="generator" content="Hugo 0.75.1" />
+	<title>Session 4: Homework 2 &middot; Warren&#39;s Portfolio Website</title>
+	<!-- Stylesheets -->
+	
+	<link rel="stylesheet" href="/css/main.css"/>
+	
+	
+
+	
+
+	<!-- Custom Fonts -->
+	<link href="/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+	
+	<link rel="shortcut icon" type="image/x-icon" href="/favicon.ico">
+	<link rel="icon" type="image/x-icon" href="/favicon.ico">
+	
+
+	<!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+	<!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+	<!--[if lt IE 9]>
+	<script src="js/ie/html5shiv.js"></script>
+	<script src="js/ie/html5shiv.jsrespond.min.js"></script>
+	<![endif]-->
+</head>
+
+    <body>
+
+    <!-- Wrapper -->
+        <div id="wrapper">
+
+            <!-- Header -->
+    <header id="header" class="alt">
+        <a href="/" class="logo"><strong>Warren Hu</strong> <span>London Business School MFA2021</span></a>
+        <nav>
+            <a href="#menu">Menu</a>
+        </nav>
+    </header>
+
+<!-- Menu -->
+    <nav id="menu">
+        <ul class="links">
+            
+
+        </ul>
+        <ul class="actions vertical">
+            
+                <li><a href="/" class="button special fit">Click here to return</a></li>
+            
+            
+                <li><a href="/" class="button fit">Or here</a></li>
+            
+        </ul>
+    </nav>
+
+        <!-- Main -->
+            <div id="main" class="alt">
+
+                
+                    <section id="one">
+                        <div class="inner">
+                            <header class="major">
+                                <h1>Session 4: Homework 2</h1>
+                            </header>
+                            
+                            
+
+
+<div id="climate-change-and-temperature-anomalies" class="section level1">
+<h1>Climate change and temperature anomalies</h1>
+<p>Loading the file:</p>
+<pre class="r"><code>weather &lt;- 
+  read_csv(&quot;https://data.giss.nasa.gov/gistemp/tabledata_v3/NH.Ts+dSST.csv&quot;, 
+           skip = 1, 
+           na = &quot;***&quot;)</code></pre>
+<p>Selecting the year and the twelve month variables from the <code>weather</code> dataset, and converting the dataframe from wide to ‘long’ format.</p>
+<pre class="r"><code>glimpse(weather)</code></pre>
+<pre><code>## Rows: 140
+## Columns: 19
+## $ Year  &lt;dbl&gt; 1880, 1881, 1882, 1883, 1884, 1885, 1886, 1887, 1888, 1889, 1...
+## $ Jan   &lt;dbl&gt; -0.54, -0.19, 0.22, -0.59, -0.23, -1.00, -0.68, -1.07, -0.53,...
+## $ Feb   &lt;dbl&gt; -0.38, -0.25, 0.22, -0.67, -0.11, -0.37, -0.68, -0.58, -0.59,...
+## $ Mar   &lt;dbl&gt; -0.26, 0.02, 0.00, -0.16, -0.65, -0.21, -0.57, -0.36, -0.58, ...
+## $ Apr   &lt;dbl&gt; -0.37, -0.02, -0.36, -0.27, -0.62, -0.53, -0.34, -0.42, -0.24...
+## $ May   &lt;dbl&gt; -0.11, -0.06, -0.32, -0.32, -0.42, -0.55, -0.34, -0.27, -0.16...
+## $ Jun   &lt;dbl&gt; -0.22, -0.36, -0.38, -0.26, -0.52, -0.47, -0.43, -0.20, -0.04...
+## $ Jul   &lt;dbl&gt; -0.23, -0.06, -0.37, -0.09, -0.48, -0.39, -0.20, -0.23, 0.04,...
+## $ Aug   &lt;dbl&gt; -0.24, -0.03, -0.14, -0.26, -0.50, -0.44, -0.47, -0.52, -0.19...
+## $ Sep   &lt;dbl&gt; -0.26, -0.23, -0.17, -0.33, -0.45, -0.32, -0.34, -0.17, -0.12...
+## $ Oct   &lt;dbl&gt; -0.32, -0.40, -0.53, -0.21, -0.41, -0.30, -0.31, -0.40, 0.04,...
+## $ Nov   &lt;dbl&gt; -0.37, -0.42, -0.32, -0.40, -0.48, -0.28, -0.45, -0.19, -0.03...
+## $ Dec   &lt;dbl&gt; -0.48, -0.28, -0.42, -0.25, -0.40, 0.00, -0.17, -0.43, -0.26,...
+## $ `J-D` &lt;dbl&gt; -0.32, -0.19, -0.21, -0.32, -0.44, -0.40, -0.42, -0.40, -0.22...
+## $ `D-N` &lt;dbl&gt; NA, -0.21, -0.20, -0.33, -0.43, -0.44, -0.40, -0.38, -0.24, -...
+## $ DJF   &lt;dbl&gt; NA, -0.31, 0.06, -0.56, -0.20, -0.59, -0.45, -0.61, -0.52, -0...
+## $ MAM   &lt;dbl&gt; -0.24, -0.02, -0.22, -0.25, -0.56, -0.43, -0.42, -0.35, -0.33...
+## $ JJA   &lt;dbl&gt; -0.23, -0.15, -0.30, -0.20, -0.50, -0.44, -0.37, -0.32, -0.06...
+## $ SON   &lt;dbl&gt; -0.32, -0.35, -0.34, -0.32, -0.44, -0.30, -0.37, -0.25, -0.04...</code></pre>
+<pre class="r"><code>tidyweather &lt;- weather %&gt;% select(c(1:13)) %&gt;% 
+  pivot_longer(cols = 2:13, names_to = &quot;month&quot;, values_to = &quot;delta&quot;)
+
+glimpse(tidyweather)</code></pre>
+<pre><code>## Rows: 1,680
+## Columns: 3
+## $ Year  &lt;dbl&gt; 1880, 1880, 1880, 1880, 1880, 1880, 1880, 1880, 1880, 1880, 1...
+## $ month &lt;chr&gt; &quot;Jan&quot;, &quot;Feb&quot;, &quot;Mar&quot;, &quot;Apr&quot;, &quot;May&quot;, &quot;Jun&quot;, &quot;Jul&quot;, &quot;Aug&quot;, &quot;Sep&quot;...
+## $ delta &lt;dbl&gt; -0.54, -0.38, -0.26, -0.37, -0.11, -0.22, -0.23, -0.24, -0.26...</code></pre>
+<div id="plotting-information" class="section level2">
+<h2>Plotting Information</h2>
+<p>Plotting the data using a time-series scatter plot, and adding a trendline.</p>
+<pre class="r"><code>tidyweather &lt;- tidyweather %&gt;%
+  mutate(date = ymd(paste(as.character(Year), month, &quot;1&quot;)),
+         month = month(date, label=TRUE),
+         year = year(date))
+
+glimpse(tidyweather)</code></pre>
+<pre><code>## Rows: 1,680
+## Columns: 5
+## $ Year  &lt;dbl&gt; 1880, 1880, 1880, 1880, 1880, 1880, 1880, 1880, 1880, 1880, 1...
+## $ month &lt;ord&gt; Jan, Feb, Mar, Apr, May, Jun, Jul, Aug, Sep, Oct, Nov, Dec, J...
+## $ delta &lt;dbl&gt; -0.54, -0.38, -0.26, -0.37, -0.11, -0.22, -0.23, -0.24, -0.26...
+## $ date  &lt;date&gt; 1880-01-01, 1880-02-01, 1880-03-01, 1880-04-01, 1880-05-01, ...
+## $ year  &lt;dbl&gt; 1880, 1880, 1880, 1880, 1880, 1880, 1880, 1880, 1880, 1880, 1...</code></pre>
+<pre class="r"><code>ggplot(tidyweather, aes(x=year, y = delta))+
+  geom_point()+
+  geom_smooth(color=&quot;red&quot;) +
+  theme_bw() +
+  labs (
+    title = &quot;Weather Anomalies&quot;,
+    y = &quot;Delta&quot;,
+    x = &quot;Year&quot;
+  )</code></pre>
+<p><img src="/projects/project2/index_files/figure-html/scatter_plot-1.png" width="648" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>ggplot(tidyweather, aes(x=year, y = delta))+
+  geom_point()+
+  geom_smooth(color=&quot;red&quot;) +
+  facet_wrap(~month) + 
+  theme_bw() +
+  labs (
+    title = &quot;Weather Anomalies&quot;,
+    x = &quot;Year&quot;,
+    y = &quot;Delta&quot;
+  )</code></pre>
+<p><img src="/projects/project2/index_files/figure-html/facet_wrap-1.png" width="648" style="display: block; margin: auto;" /></p>
+<p>We can see that the effect of increasing temperature is more pronounced in months Jan-April, where the delta is varying a lot and by greater extent.</p>
+<pre class="r"><code>comparison &lt;- tidyweather %&gt;% 
+  filter(Year&gt;= 1881) %&gt;%     #remove years prior to 1881
+  #create new variable &#39;interval&#39;, and assign values based on criteria below:
+  mutate(interval = case_when(
+    Year %in% c(1881:1920) ~ &quot;1881-1920&quot;,
+    Year %in% c(1921:1950) ~ &quot;1921-1950&quot;,
+    Year %in% c(1951:1980) ~ &quot;1951-1980&quot;,
+    Year %in% c(1981:2010) ~ &quot;1981-2010&quot;,
+    TRUE ~ &quot;2011-present&quot;
+  ))
+
+glimpse(comparison)</code></pre>
+<pre><code>## Rows: 1,668
+## Columns: 6
+## $ Year     &lt;dbl&gt; 1881, 1881, 1881, 1881, 1881, 1881, 1881, 1881, 1881, 1881...
+## $ month    &lt;ord&gt; Jan, Feb, Mar, Apr, May, Jun, Jul, Aug, Sep, Oct, Nov, Dec...
+## $ delta    &lt;dbl&gt; -0.19, -0.25, 0.02, -0.02, -0.06, -0.36, -0.06, -0.03, -0....
+## $ date     &lt;date&gt; 1881-01-01, 1881-02-01, 1881-03-01, 1881-04-01, 1881-05-0...
+## $ year     &lt;dbl&gt; 1881, 1881, 1881, 1881, 1881, 1881, 1881, 1881, 1881, 1881...
+## $ interval &lt;chr&gt; &quot;1881-1920&quot;, &quot;1881-1920&quot;, &quot;1881-1920&quot;, &quot;1881-1920&quot;, &quot;1881-...</code></pre>
+<p>Creating a density plot to study the distribution of monthly deviations (<code>delta</code>), grouped by the different time periods.</p>
+<pre class="r"><code>ggplot(comparison, aes(x=delta, fill=interval))+
+  geom_density(alpha=0.2) +   #density plot with tranparency set to 20%
+  theme_bw() +                #theme
+  labs (
+    title = &quot;Density Plot for Monthly Temperature Anomalies&quot;,
+    y     = &quot;Density&quot;,         #changing y-axis label to sentence case,
+    x = &quot;Delta&quot;
+  )</code></pre>
+<p><img src="/projects/project2/index_files/figure-html/density_plot-1.png" width="648" style="display: block; margin: auto;" /></p>
+<p>Average annual anomalies.</p>
+<pre class="r"><code>#creating yearly averages
+average_annual_anomaly &lt;- tidyweather %&gt;% 
+  group_by(year) %&gt;%   #grouping data by Year
+  
+  # creating summaries for mean delta 
+  # use `na.rm=TRUE` to eliminate NA (not available) values 
+  summarise(annual_average_delta = mean(delta, na.rm=TRUE)) 
+
+#plotting the data:
+ggplot(average_annual_anomaly, aes(x=year, y= annual_average_delta))+
+  geom_point()+
+  
+  #Fit the best fit line, using LOESS method
+  geom_smooth() +
+  
+  #change to theme_bw() to have white background + black frame around plot
+  theme_bw() +
+  labs (
+    title = &quot;Average Yearly Anomaly&quot;,
+    y     = &quot;Average Annual Delta&quot;,
+    x = &quot;Year&quot;
+  )                         </code></pre>
+<p><img src="/projects/project2/index_files/figure-html/averaging-1.png" width="648" style="display: block; margin: auto;" /></p>
+</div>
+<div id="confidence-interval-for-delta" class="section level2">
+<h2>Confidence Interval for <code>delta</code></h2>
+<p>constructing a confidence interval for the average annual delta since 2011, using a formula.</p>
+<pre class="r"><code>formula_ci &lt;- comparison %&gt;% filter(interval == &quot;2011-present&quot;) %&gt;% 
+  summarise(mean_delta = mean(delta, na.rm = TRUE),
+            sd_delta = sd(delta, na.rm = TRUE),
+            count_delta = n()) %&gt;%
+  mutate(se_delta = sd_delta / sqrt(count_delta),
+         lower_ci = mean_delta - qt(1 - (0.05 / 2), count_delta - 1) * se_delta,
+         upper_ci = mean_delta + qt(1 - (0.05 / 2), count_delta - 1) * se_delta)
+
+
+#print out formula_CI
+formula_ci</code></pre>
+<pre><code>## # A tibble: 1 x 6
+##   mean_delta sd_delta count_delta se_delta lower_ci upper_ci
+##        &lt;dbl&gt;    &lt;dbl&gt;       &lt;int&gt;    &lt;dbl&gt;    &lt;dbl&gt;    &lt;dbl&gt;
+## 1      0.966    0.262         108   0.0252    0.916     1.02</code></pre>
+<pre class="r"><code># use the infer package to construct a 95% CI for delta
+set.seed(1234)
+
+bootstrap_data &lt;- comparison %&gt;% filter(interval == &quot;2011-present&quot;) %&gt;% 
+  specify(response = delta) %&gt;% 
+  generate(reps=1000, type=&quot;bootstrap&quot;) %&gt;%
+  calculate(stat=&quot;mean&quot;)
+
+ci_bootstrap &lt;- bootstrap_data %&gt;% 
+  get_confidence_interval(level = 0.95, type = &quot;percentile&quot;)
+
+ci_bootstrap</code></pre>
+<pre><code>## # A tibble: 1 x 2
+##   lower_ci upper_ci
+##      &lt;dbl&gt;    &lt;dbl&gt;
+## 1    0.917     1.02</code></pre>
+<pre class="r"><code>ggplot(bootstrap_data, aes(x=stat)) +
+  geom_density(color=&quot;red&quot;) +
+  stat_function(fun = dnorm, color=&quot;blue&quot;, args = list(mean = mean(bootstrap_data$stat), sd = sd(bootstrap_data$stat))) +
+  theme_bw() + 
+  labs(title = &quot;Comparing Bootstrap (red) with Normal Distribution (blue) curve&quot;,
+       y = &quot;Density&quot;)</code></pre>
+<p><img src="/projects/project2/index_files/figure-html/calculate_CI_using_bootstrap-1.png" width="648" style="display: block; margin: auto;" /></p>
+<p>Data shows us that with 95% confidence we can say that average annual delta since 2011 lies between 0.92 and 1.02, which is a significant number. If this trend continues, it’d be too late reverse the impact and save our planet.</p>
+</div>
+</div>
+<div id="general-social-survey-gss" class="section level1">
+<h1>General Social Survey (GSS)</h1>
+<pre class="r"><code>gss &lt;- read_csv(&quot;smallgss2016.csv&quot;, 
+                na = c(&quot;&quot;, &quot;Don&#39;t know&quot;,
+                       &quot;No answer&quot;, &quot;Not applicable&quot;))
+
+glimpse(gss)</code></pre>
+<pre><code>## Rows: 2,867
+## Columns: 7
+## $ emailmin &lt;chr&gt; &quot;0&quot;, &quot;30&quot;, &quot;NA&quot;, &quot;10&quot;, &quot;NA&quot;, &quot;0&quot;, &quot;0&quot;, &quot;NA&quot;, &quot;0&quot;, &quot;NA&quot;, &quot;0...
+## $ emailhr  &lt;chr&gt; &quot;12&quot;, &quot;0&quot;, &quot;NA&quot;, &quot;0&quot;, &quot;NA&quot;, &quot;2&quot;, &quot;40&quot;, &quot;NA&quot;, &quot;0&quot;, &quot;NA&quot;, &quot;2...
+## $ snapchat &lt;chr&gt; &quot;NA&quot;, &quot;No&quot;, &quot;No&quot;, &quot;NA&quot;, &quot;Yes&quot;, &quot;No&quot;, &quot;NA&quot;, &quot;Yes&quot;, &quot;NA&quot;, &quot;N...
+## $ instagrm &lt;chr&gt; &quot;NA&quot;, &quot;No&quot;, &quot;No&quot;, &quot;NA&quot;, &quot;Yes&quot;, &quot;Yes&quot;, &quot;NA&quot;, &quot;Yes&quot;, &quot;NA&quot;, &quot;...
+## $ twitter  &lt;chr&gt; &quot;NA&quot;, &quot;No&quot;, &quot;No&quot;, &quot;NA&quot;, &quot;No&quot;, &quot;No&quot;, &quot;NA&quot;, &quot;No&quot;, &quot;NA&quot;, &quot;No&quot;...
+## $ sex      &lt;chr&gt; &quot;Male&quot;, &quot;Male&quot;, &quot;Male&quot;, &quot;Female&quot;, &quot;Female&quot;, &quot;Female&quot;, &quot;Mal...
+## $ degree   &lt;chr&gt; &quot;Bachelor&quot;, &quot;High school&quot;, &quot;Bachelor&quot;, &quot;High school&quot;, &quot;Gra...</code></pre>
+<div id="instagram-and-snapchat-by-sex" class="section level2">
+<h2>Instagram and Snapchat, by sex</h2>
+<p>Estimating the <em>population</em> proportion of Snapchat or Instagram users in 2016:</p>
+<ol style="list-style-type: decimal">
+<li>Creating a new variable, <code>snap_insta</code> that is <em>Yes</em> if the respondent reported using any of Snapchat (<code>snapchat</code>) or Instagram (<code>instagrm</code>), and <em>No</em> if not. If the recorded value was NA for both of these questions, the value in this new variable is also NA.</li>
+</ol>
+<pre class="r"><code>gss &lt;- gss %&gt;% mutate(snap_insta = case_when(
+  snapchat==&quot;Yes&quot;|instagrm==&quot;Yes&quot;~&quot;Yes&quot;,
+  snapchat==&quot;No&quot;|instagrm==&quot;No&quot;~&quot;No&quot;,
+  TRUE~&quot;NA&quot;))</code></pre>
+<ol start="2" style="list-style-type: decimal">
+<li>Calculating the proportion of Yes’s for <code>snap_insta</code> among those who answered the question, i.e. excluding NAs.</li>
+</ol>
+<pre class="r"><code>gss_snap_insta_cleaned &lt;- gss %&gt;%
+  filter(snap_insta %in% c(&quot;Yes&quot;, &quot;No&quot;)) %&gt;% 
+  mutate(snap_insta_val = ifelse(snap_insta == &quot;Yes&quot;, 1, 0))
+
+snap_insta_prop &lt;-  gss_snap_insta_cleaned %&gt;%
+  summarise(proportion=prop(snap_insta_val, success = 1))
+
+snap_insta_prop</code></pre>
+<pre><code>## # A tibble: 1 x 1
+##   proportion
+##        &lt;dbl&gt;
+## 1      0.375</code></pre>
+<ol start="3" style="list-style-type: decimal">
+<li>Constructing 95% CIs for men and women who used either Snapchat or Instagram</li>
+</ol>
+<pre class="r"><code>formula_ci &lt;- gss_snap_insta_cleaned %&gt;% group_by(sex) %&gt;% 
+  summarise(mean_sip= mean(snap_insta_val, na.rm = TRUE),
+            sd_sip = sd(snap_insta_val, na.rm = TRUE),
+            count_sip = n()) %&gt;%
+  mutate(se_sip = sd_sip / sqrt(count_sip),
+         lower_ci = mean_sip - qt(1 - (0.05 / 2), count_sip - 1) * se_sip,
+         upper_ci = mean_sip + qt(1 - (0.05 / 2), count_sip - 1) * se_sip)
+
+formula_ci</code></pre>
+<pre><code>## # A tibble: 2 x 7
+##   sex    mean_sip sd_sip count_sip se_sip lower_ci upper_ci
+##   &lt;chr&gt;     &lt;dbl&gt;  &lt;dbl&gt;     &lt;int&gt;  &lt;dbl&gt;    &lt;dbl&gt;    &lt;dbl&gt;
+## 1 Female    0.419  0.494       769 0.0178    0.384    0.454
+## 2 Male      0.318  0.466       603 0.0190    0.281    0.356</code></pre>
+</div>
+<div id="twitter-by-education-level" class="section level2">
+<h2>Twitter, by education level</h2>
+<p>Estimate the <em>population</em> proportion of Twitter users by education level in 2016.</p>
+<p>There are 5 education levels in variable <code>degree</code> which, in ascneding order of years of education, are Lt high school, High School, Junior college, Bachelor, Graduate.</p>
+<ol style="list-style-type: decimal">
+<li>Turn <code>degree</code> from a character variable into a factor variable. Make sure the order is the correct one and that levels are not sorted alphabetically which is what R by default does.</li>
+</ol>
+<pre class="r"><code>gss_degree_cleaned &lt;- gss %&gt;% filter(!degree %in% c(&quot;NA&quot;))
+gss_degree_cleaned$degree &lt;- factor(gss_degree_cleaned$degree, ordered=TRUE, levels = c(&quot;Lt high school&quot;,&quot;High school&quot;, &quot;Junior college&quot;, &quot;Bachelor&quot;, &quot;Graduate&quot;))
+
+unique(gss_degree_cleaned$degree)</code></pre>
+<pre><code>## [1] Bachelor       High school    Graduate       Junior college Lt high school
+## 5 Levels: Lt high school &lt; High school &lt; Junior college &lt; ... &lt; Graduate</code></pre>
+<ol start="2" style="list-style-type: decimal">
+<li>Create a new variable, <code>bachelor_graduate</code> that is <em>Yes</em> if the respondent has either a <code>Bachelor</code> or <code>Graduate</code> degree. As before, if the recorded value for either was NA, the value in your new variable should also be NA.</li>
+</ol>
+<pre class="r"><code>gss &lt;- gss %&gt;% mutate(bachelor_graduate = case_when(degree==&quot;Bachelor&quot;|degree==&quot;Graduate&quot;~&quot;Yes&quot;, degree==&quot;NA&quot;~&quot;NA&quot;,
+                                                    TRUE~&quot;No&quot;))
+
+gss</code></pre>
+<pre><code>## # A tibble: 2,867 x 9
+##    emailmin emailhr snapchat instagrm twitter sex   degree snap_insta
+##    &lt;chr&gt;    &lt;chr&gt;   &lt;chr&gt;    &lt;chr&gt;    &lt;chr&gt;   &lt;chr&gt; &lt;chr&gt;  &lt;chr&gt;     
+##  1 0        12      NA       NA       NA      Male  Bache~ NA        
+##  2 30       0       No       No       No      Male  High ~ No        
+##  3 NA       NA      No       No       No      Male  Bache~ No        
+##  4 10       0       NA       NA       NA      Fema~ High ~ NA        
+##  5 NA       NA      Yes      Yes      No      Fema~ Gradu~ Yes       
+##  6 0        2       No       Yes      No      Fema~ Junio~ Yes       
+##  7 0        40      NA       NA       NA      Male  High ~ NA        
+##  8 NA       NA      Yes      Yes      No      Fema~ High ~ Yes       
+##  9 0        0       NA       NA       NA      Male  High ~ NA        
+## 10 NA       NA      No       No       No      Male  Junio~ No        
+## # ... with 2,857 more rows, and 1 more variable: bachelor_graduate &lt;chr&gt;</code></pre>
+<ol start="3" style="list-style-type: decimal">
+<li>Calculate the proportion of <code>bachelor_graduate</code> who do (Yes) and who don’t (No) use twitter.</li>
+</ol>
+<pre class="r"><code>twitter_prop_yes &lt;- gss %&gt;%
+  filter(bachelor_graduate == &quot;Yes&quot; &amp; !twitter %in% &quot;NA&quot;) %&gt;%
+  summarise(proportion=count(twitter==&quot;Yes&quot;)/n())
+
+twitter_prop_yes</code></pre>
+<pre><code>## # A tibble: 1 x 1
+##   proportion
+##        &lt;dbl&gt;
+## 1      0.233</code></pre>
+<pre class="r"><code>twitter_prop_no &lt;- gss %&gt;%
+  filter(bachelor_graduate == &quot;Yes&quot; &amp; !twitter %in% &quot;NA&quot;) %&gt;%
+  summarise(proportion=count(twitter==&quot;No&quot;)/n())
+
+twitter_prop_no</code></pre>
+<pre><code>## # A tibble: 1 x 1
+##   proportion
+##        &lt;dbl&gt;
+## 1      0.767</code></pre>
+<ol start="4" style="list-style-type: decimal">
+<li>Using the CI formula for proportions, please construct two 95% CIs for <code>bachelor_graduate</code> vs whether they use (Yes) and don’t (No) use twitter.</li>
+</ol>
+<pre class="r"><code>twitter_yes &lt;- gss %&gt;%
+  filter(bachelor_graduate==&quot;Yes&quot; &amp; !twitter %in% &quot;NA&quot;) %&gt;%
+  mutate(twitter_val = ifelse(twitter == &quot;Yes&quot;, 1, 0)) %&gt;% 
+  summarise(mean_val= mean(twitter_val, na.rm=TRUE),
+            sd_val = sd(twitter_val, na.rm=TRUE),
+            count = n()) %&gt;%
+  mutate(se = sd_val / sqrt(count),
+         lower_ci = mean_val - qt(1 - (0.05 / 2), count - 1) * se,
+         upper_ci = mean_val + qt(1 - (0.05 / 2), count - 1) * se)
+
+twitter_yes</code></pre>
+<pre><code>## # A tibble: 1 x 6
+##   mean_val sd_val count     se lower_ci upper_ci
+##      &lt;dbl&gt;  &lt;dbl&gt; &lt;int&gt;  &lt;dbl&gt;    &lt;dbl&gt;    &lt;dbl&gt;
+## 1    0.233  0.423   489 0.0191    0.196    0.271</code></pre>
+<pre class="r"><code>twitter_no &lt;- gss %&gt;%
+  filter(bachelor_graduate==&quot;Yes&quot; &amp; !twitter %in% &quot;NA&quot;) %&gt;%
+  mutate(twitter_val = ifelse(twitter == &quot;No&quot;, 1, 0)) %&gt;% 
+  summarise(mean_val= mean(twitter_val, na.rm=TRUE),
+            sd_val = sd(twitter_val, na.rm=TRUE),
+            count = n()) %&gt;%
+  mutate(se = sd_val / sqrt(count),
+         lower_ci = mean_val - qt(1 - (0.05 / 2), count - 1) * se,
+         upper_ci = mean_val + qt(1 - (0.05 / 2), count - 1) * se)
+
+twitter_no</code></pre>
+<pre><code>## # A tibble: 1 x 6
+##   mean_val sd_val count     se lower_ci upper_ci
+##      &lt;dbl&gt;  &lt;dbl&gt; &lt;int&gt;  &lt;dbl&gt;    &lt;dbl&gt;    &lt;dbl&gt;
+## 1    0.767  0.423   489 0.0191    0.729    0.804</code></pre>
+<ol start="5" style="list-style-type: decimal">
+<li>Do these two Confidence Intervals overlap? No, these don’t overlap.</li>
+</ol>
+</div>
+<div id="email-usage" class="section level2">
+<h2>Email usage</h2>
+<p>Can we estimate the <em>population</em> parameter on time spent on email weekly?</p>
+<ol style="list-style-type: decimal">
+<li>Create a new variable called <code>email</code> that combines <code>emailhr</code> and <code>emailmin</code> to reports the number of minutes the respondents spend on email weekly.</li>
+</ol>
+<pre class="r"><code>gss$emailhr &lt;- as.numeric(gss$emailhr)
+gss$emailmin &lt;- as.numeric(gss$emailmin)
+
+gss_email &lt;- gss %&gt;% filter(!is.na(emailhr) &amp; !is.na(emailmin)) %&gt;% 
+  mutate(email = emailhr*60+emailmin)
+
+gss_email</code></pre>
+<pre><code>## # A tibble: 1,649 x 10
+##    emailmin emailhr snapchat instagrm twitter sex   degree snap_insta
+##       &lt;dbl&gt;   &lt;dbl&gt; &lt;chr&gt;    &lt;chr&gt;    &lt;chr&gt;   &lt;chr&gt; &lt;chr&gt;  &lt;chr&gt;     
+##  1        0      12 NA       NA       NA      Male  Bache~ NA        
+##  2       30       0 No       No       No      Male  High ~ No        
+##  3       10       0 NA       NA       NA      Fema~ High ~ NA        
+##  4        0       2 No       Yes      No      Fema~ Junio~ Yes       
+##  5        0      40 NA       NA       NA      Male  High ~ NA        
+##  6        0       0 NA       NA       NA      Male  High ~ NA        
+##  7        0       2 No       No       No      Fema~ High ~ No        
+##  8        0      10 No       No       No      Male  High ~ No        
+##  9       30       0 No       No       No      Male  Lt hi~ No        
+## 10        0       1 NA       NA       NA      Fema~ Lt hi~ NA        
+## # ... with 1,639 more rows, and 2 more variables: bachelor_graduate &lt;chr&gt;,
+## #   email &lt;dbl&gt;</code></pre>
+<ol start="2" style="list-style-type: decimal">
+<li>Visualise the distribution of this new variable. Find the mean and the median number of minutes respondents spend on email weekly. Is the mean or the median a better measure of the typical amoung of time Americans spend on email weekly? Why?</li>
+</ol>
+<pre class="r"><code>ggplot(gss_email, aes(x=email)) + geom_density() +labs(title=&quot;Weekly time spent on email by Americans&quot;, x=&quot;Weekly time spent on email (min)&quot;, y=&quot;Density&quot;)</code></pre>
+<p><img src="/projects/project2/index_files/figure-html/mean_median-1.png" width="648" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>mean_median &lt;- gss_email %&gt;% summarise(mean_email=mean(email, na.rm=TRUE), median_email=median(email, na.rm=TRUE))
+
+mean_median</code></pre>
+<pre><code>## # A tibble: 1 x 2
+##   mean_email median_email
+##        &lt;dbl&gt;        &lt;dbl&gt;
+## 1       417.          120</code></pre>
+<p>The median seems to be a better measure of the weekly time spent by Americans on email as the density plot suggests that the large majority of Americans spend around 120 min on their emails every week.In fact, only around 0.05% of the American population surveyed here spends around 417 min on their emails.</p>
+<ol start="3" style="list-style-type: decimal">
+<li>Using the <code>infer</code> package, calculate a 95% bootstrap confidence interval for the mean amount of time Americans spend on email weekly. Interpret this interval in context of the data, reporting its endpoints in “humanized” units (e.g. instead of 108 minutes, report 1 hr and 8 minutes). If you get a result that seems a bit odd, discuss why you think this might be the case.</li>
+</ol>
+<pre class="r"><code>set.seed(1234)
+
+email_ci_bootstrap &lt;- gss_email %&gt;% filter(!is.na(email)) %&gt;% 
+  specify(response = email) %&gt;% 
+  generate(reps=1000, type=&quot;bootstrap&quot;) %&gt;%
+  calculate(stat=&quot;mean&quot;) %&gt;% 
+  get_confidence_interval(level = 0.95, type = &quot;percentile&quot;)
+
+email_ci_bootstrap</code></pre>
+<pre><code>## # A tibble: 1 x 2
+##   lower_ci upper_ci
+##      &lt;dbl&gt;    &lt;dbl&gt;
+## 1     385.     453.</code></pre>
+<pre class="r"><code>pretty_ci &lt;- email_ci_bootstrap %&gt;%  mutate(lower_ci_hour=lower_ci%/%60, lower_ci_minute=round(lower_ci%%60,0),upper_ci_hour=upper_ci%/%60, upper_ci_minute=round(upper_ci%%60,0))
+
+pretty_ci</code></pre>
+<pre><code>## # A tibble: 1 x 6
+##   lower_ci upper_ci lower_ci_hour lower_ci_minute upper_ci_hour upper_ci_minute
+##      &lt;dbl&gt;    &lt;dbl&gt;         &lt;dbl&gt;           &lt;dbl&gt;         &lt;dbl&gt;           &lt;dbl&gt;
+## 1     385.     453.             6              25             7              33</code></pre>
+<pre class="r"><code>paste(&quot;Lower ci: &quot;, pretty_ci$lower_ci_hour,&quot;hours and&quot;, pretty_ci$lower_ci_minute, &quot;minutes&quot;)</code></pre>
+<pre><code>## [1] &quot;Lower ci:  6 hours and 25 minutes&quot;</code></pre>
+<pre class="r"><code>paste(&quot;Upper ci:&quot;, pretty_ci$upper_ci_hour, &quot;hours and&quot;, pretty_ci$upper_ci_minute, &quot;minutes&quot;)</code></pre>
+<pre><code>## [1] &quot;Upper ci: 7 hours and 33 minutes&quot;</code></pre>
+<ol start="4" style="list-style-type: decimal">
+<li>Would you expect a 99% confidence interval to be wider or narrower than the interval you calculated above? Explain your reasoning.
+In theory, a 99% confidence interval would be expected to be wider. It should encompass more values than the 95% ci in order to be 99% sure that the time spent on email weekly would fall in the confidence interval.</li>
+</ol>
+</div>
+</div>
+<div id="trumps-approval-margins" class="section level1">
+<h1>Trump’s Approval Margins</h1>
+<pre class="r"><code># Import approval polls data
+approval_polllist &lt;- read_csv(&quot;approval_polllist.csv&quot;)
+
+# or directly off fivethirtyeight website
+# approval_polllist &lt;- read_csv(&#39;https://projects.fivethirtyeight.com/trump-approval-data/approval_polllist.csv&#39;) 
+
+glimpse(approval_polllist)</code></pre>
+<pre><code>## Rows: 15,619
+## Columns: 22
+## $ president           &lt;chr&gt; &quot;Donald Trump&quot;, &quot;Donald Trump&quot;, &quot;Donald Trump&quot;,...
+## $ subgroup            &lt;chr&gt; &quot;All polls&quot;, &quot;All polls&quot;, &quot;All polls&quot;, &quot;All pol...
+## $ modeldate           &lt;chr&gt; &quot;9/27/2020&quot;, &quot;9/27/2020&quot;, &quot;9/27/2020&quot;, &quot;9/27/20...
+## $ startdate           &lt;chr&gt; &quot;1/20/2017&quot;, &quot;1/20/2017&quot;, &quot;1/20/2017&quot;, &quot;1/21/20...
+## $ enddate             &lt;chr&gt; &quot;1/22/2017&quot;, &quot;1/22/2017&quot;, &quot;1/24/2017&quot;, &quot;1/23/20...
+## $ pollster            &lt;chr&gt; &quot;Gallup&quot;, &quot;Morning Consult&quot;, &quot;Ipsos&quot;, &quot;Gallup&quot;,...
+## $ grade               &lt;chr&gt; &quot;B&quot;, &quot;B/C&quot;, &quot;B-&quot;, &quot;B&quot;, &quot;B-&quot;, &quot;C+&quot;, &quot;B+&quot;, &quot;B&quot;, &quot;...
+## $ samplesize          &lt;dbl&gt; 1500, 1992, 1632, 1500, 1651, 1500, 1190, 1500,...
+## $ population          &lt;chr&gt; &quot;a&quot;, &quot;rv&quot;, &quot;a&quot;, &quot;a&quot;, &quot;a&quot;, &quot;lv&quot;, &quot;rv&quot;, &quot;a&quot;, &quot;lv&quot;...
+## $ weight              &lt;dbl&gt; 0.262, 0.680, 0.153, 0.243, 0.142, 0.200, 1.514...
+## $ influence           &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,...
+## $ approve             &lt;dbl&gt; 45.0, 46.0, 42.1, 45.0, 42.3, 57.0, 36.0, 46.0,...
+## $ disapprove          &lt;dbl&gt; 45.0, 37.0, 45.2, 46.0, 45.8, 43.0, 44.0, 45.0,...
+## $ adjusted_approve    &lt;dbl&gt; 45.7, 45.3, 43.2, 45.7, 43.4, 51.5, 37.6, 46.7,...
+## $ adjusted_disapprove &lt;dbl&gt; 43.6, 38.3, 43.9, 44.6, 44.5, 44.5, 42.8, 43.6,...
+## $ multiversions       &lt;chr&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA,...
+## $ tracking            &lt;lgl&gt; TRUE, NA, TRUE, TRUE, TRUE, TRUE, NA, TRUE, TRU...
+## $ url                 &lt;chr&gt; &quot;http://www.gallup.com/poll/201617/gallup-daily...
+## $ poll_id             &lt;dbl&gt; 49253, 49249, 49426, 49262, 49425, 49266, 49260...
+## $ question_id         &lt;dbl&gt; 77265, 77261, 77599, 77274, 77598, 77278, 77272...
+## $ createddate         &lt;chr&gt; &quot;1/23/2017&quot;, &quot;1/23/2017&quot;, &quot;3/1/2017&quot;, &quot;1/24/201...
+## $ timestamp           &lt;chr&gt; &quot;00:45:20 27 Sep 2020&quot;, &quot;00:45:20 27 Sep 2020&quot;,...</code></pre>
+<pre class="r"><code># Use `lubridate` to fix dates, as they are given as characters.</code></pre>
+<pre class="r"><code># Use `lubridate` to fix dates, as they are given as characters.
+
+library(lubridate)
+approval_polllist_converted &lt;- approval_polllist %&gt;% 
+  mutate(modeldate = mdy(modeldate),
+         startdate = mdy(startdate), 
+         enddate = mdy(enddate))
+
+approval_polllist_converted</code></pre>
+<pre><code>## # A tibble: 15,619 x 22
+##    president subgroup modeldate  startdate  enddate    pollster grade samplesize
+##    &lt;chr&gt;     &lt;chr&gt;    &lt;date&gt;     &lt;date&gt;     &lt;date&gt;     &lt;chr&gt;    &lt;chr&gt;      &lt;dbl&gt;
+##  1 Donald T~ All pol~ 2020-09-27 2017-01-20 2017-01-22 Gallup   B           1500
+##  2 Donald T~ All pol~ 2020-09-27 2017-01-20 2017-01-22 Morning~ B/C         1992
+##  3 Donald T~ All pol~ 2020-09-27 2017-01-20 2017-01-24 Ipsos    B-          1632
+##  4 Donald T~ All pol~ 2020-09-27 2017-01-21 2017-01-23 Gallup   B           1500
+##  5 Donald T~ All pol~ 2020-09-27 2017-01-21 2017-01-25 Ipsos    B-          1651
+##  6 Donald T~ All pol~ 2020-09-27 2017-01-22 2017-01-24 Rasmuss~ C+          1500
+##  7 Donald T~ All pol~ 2020-09-27 2017-01-20 2017-01-25 Quinnip~ B+          1190
+##  8 Donald T~ All pol~ 2020-09-27 2017-01-22 2017-01-24 Gallup   B           1500
+##  9 Donald T~ All pol~ 2020-09-27 2017-01-23 2017-01-25 Rasmuss~ C+          1500
+## 10 Donald T~ All pol~ 2020-09-27 2017-01-23 2017-01-25 Gallup   B           1500
+## # ... with 15,609 more rows, and 14 more variables: population &lt;chr&gt;,
+## #   weight &lt;dbl&gt;, influence &lt;dbl&gt;, approve &lt;dbl&gt;, disapprove &lt;dbl&gt;,
+## #   adjusted_approve &lt;dbl&gt;, adjusted_disapprove &lt;dbl&gt;, multiversions &lt;chr&gt;,
+## #   tracking &lt;lgl&gt;, url &lt;chr&gt;, poll_id &lt;dbl&gt;, question_id &lt;dbl&gt;,
+## #   createddate &lt;chr&gt;, timestamp &lt;chr&gt;</code></pre>
+<div id="create-a-plot" class="section level2">
+<h2>Create a plot</h2>
+<p>Calculating the average net approval rate (approve- disapprove) for each week since President Trump got into office.</p>
+<p>Image to plot:</p>
+<pre class="r"><code>weekly_net_approval &lt;- approval_polllist_converted %&gt;% filter(subgroup == &quot;Voters&quot;) %&gt;% 
+  mutate(net_approval = approve - disapprove,
+         week = isoweek(enddate),
+         year = year(enddate)) %&gt;%
+  group_by(year, week) %&gt;%
+  summarise(mean_weekly_nar = mean(net_approval),
+            sd_weekly_nar = sd(net_approval), 
+            count_weekly_nar = n(),
+            t_distribution=qt(0.975, count_weekly_nar-1),
+            se_weekly_nar = sd_weekly_nar/sqrt(count_weekly_nar),
+            interval_value=t_distribution*se_weekly_nar,
+            low_ci=mean_weekly_nar-interval_value,
+            high_ci=mean_weekly_nar+interval_value) %&gt;% 
+  na.omit()
+
+weekly_net_approval</code></pre>
+<pre><code>## # A tibble: 192 x 10
+## # Groups:   year [4]
+##     year  week mean_weekly_nar sd_weekly_nar count_weekly_nar t_distribution
+##    &lt;dbl&gt; &lt;dbl&gt;           &lt;dbl&gt;         &lt;dbl&gt;            &lt;int&gt;          &lt;dbl&gt;
+##  1  2017     4           2.96           7.67               14           2.16
+##  2  2017     5           1.85           3.67               20           2.09
+##  3  2017     6          -2.06           5.82               25           2.06
+##  4  2017     7          -2.46           6.35               25           2.06
+##  5  2017     8          -3.32           5.96               23           2.07
+##  6  2017     9          -0.704          3.81               23           2.07
+##  7  2017    10          -3.13           4.49               25           2.06
+##  8  2017    11          -4.67           4.43               25           2.06
+##  9  2017    12          -5.6            6.71               24           2.07
+## 10  2017    13          -9.89           3.94               25           2.06
+## # ... with 182 more rows, and 4 more variables: se_weekly_nar &lt;dbl&gt;,
+## #   interval_value &lt;dbl&gt;, low_ci &lt;dbl&gt;, high_ci &lt;dbl&gt;</code></pre>
+<pre class="r"><code>ggplot(weekly_net_approval, aes(x = week, y = mean_weekly_nar, colour=factor(year))) + 
+  facet_wrap(~year) +
+  geom_ribbon(aes(ymin = low_ci, ymax = high_ci, colour=factor(year), fill=factor(year)), alpha=0.15) +
+  scale_x_continuous(breaks = seq(0,53, by = 13), limits = c(0,53)) +
+  scale_y_continuous(breaks = seq(-20,7.5, by = 2.5), limits = c(-21,7.5)) +
+  geom_hline(yintercept=0, color=&#39;orange&#39;) +
+  geom_point() + 
+  geom_line() +
+  theme(legend.position = &quot;none&quot;) +
+  ggtitle(&quot;Estimating Net Approval (approve-disapprove) for Donald Trump&quot;, subtitle = &quot;Weekly average of all polls&quot;) +
+  labs(y=&quot;Average Net Approval (%)&quot;, x=&quot;Week of the year&quot;)</code></pre>
+<p><img src="/projects/project2/index_files/figure-html/trump_margins_plot-1.png" width="1056" style="display: block; margin: auto;" /></p>
+</div>
+<div id="compare-confidence-intervals" class="section level2">
+<h2>Compare Confidence Intervals</h2>
+<p>Comparing the confidence intervals for <code>week 15</code> (6-12 April 2020) and <code>week 34</code> (17-23 August 2020).</p>
+<pre class="r"><code>ci_wna &lt;- weekly_net_approval %&gt;% 
+  mutate(ci = interval_value * 2)
+
+ci_wna</code></pre>
+<pre><code>## # A tibble: 192 x 11
+## # Groups:   year [4]
+##     year  week mean_weekly_nar sd_weekly_nar count_weekly_nar t_distribution
+##    &lt;dbl&gt; &lt;dbl&gt;           &lt;dbl&gt;         &lt;dbl&gt;            &lt;int&gt;          &lt;dbl&gt;
+##  1  2017     4           2.96           7.67               14           2.16
+##  2  2017     5           1.85           3.67               20           2.09
+##  3  2017     6          -2.06           5.82               25           2.06
+##  4  2017     7          -2.46           6.35               25           2.06
+##  5  2017     8          -3.32           5.96               23           2.07
+##  6  2017     9          -0.704          3.81               23           2.07
+##  7  2017    10          -3.13           4.49               25           2.06
+##  8  2017    11          -4.67           4.43               25           2.06
+##  9  2017    12          -5.6            6.71               24           2.07
+## 10  2017    13          -9.89           3.94               25           2.06
+## # ... with 182 more rows, and 5 more variables: se_weekly_nar &lt;dbl&gt;,
+## #   interval_value &lt;dbl&gt;, low_ci &lt;dbl&gt;, high_ci &lt;dbl&gt;, ci &lt;dbl&gt;</code></pre>
+<pre class="r"><code>subset(ci_wna, year==2020 &amp; week==15)$ci</code></pre>
+<pre><code>## [1] 2.22</code></pre>
+<pre class="r"><code>subset(ci_wna, year==2020 &amp; week==34)$ci</code></pre>
+<pre><code>## [1] 5.15</code></pre>
+<p>Apart from the very beginning of 2017, the Trump Approval Rate (TAR) has been consistently negative, characterized by a sensible amount of variability throughout time. The graphs shows that there have been periods in which the estimate of the Average TAR was fairly accurate, with a tight CI (as for the beginning of 2019 or April-May 2020). In other cases, like end of 2017-beginning of 2018, the true Average TAR has been much harder to infer from the data at our disposal.</p>
+<p>It appears that, with the US presidential elections coming up in November 2020, it will be much harder to know the true Average TAR since the CI in the last 20 weeks has been consistently increasing, thus making the prediction of the TAR mean less certain.</p>
+</div>
+</div>
+<div id="gapminder-revisited" class="section level1">
+<h1>Gapminder revisited</h1>
+<pre class="r"><code># load gapminder HIV data
+adults_with_hiv_percent_age_15_49 &lt;- read_csv(&quot;adults_with_hiv_percent_age_15_49.csv&quot;)
+life_expectancy_years &lt;- read_csv(&quot;life_expectancy_years.csv&quot;)
+
+# get World bank data using wbstats
+indicators &lt;- c(&quot;SP.DYN.TFRT.IN&quot;,&quot;SE.PRM.NENR&quot;, &quot;SH.DYN.MORT&quot;, &quot;NY.GDP.PCAP.KD&quot;)
+
+
+library(wbstats)
+
+worldbank_data &lt;- wb_data(country=&quot;countries_only&quot;, #countries only- no aggregates like Latin America, Europe, etc.
+                          indicator = indicators, 
+                          start_date = 1960, 
+                          end_date = 2016)
+
+# get a dataframe of information regarding countries, indicators, sources, regions, indicator topics, lending types, income levels,  from the World Bank API 
+countries &lt;-  wbstats::wb_cachelist$countries</code></pre>
+<ol style="list-style-type: decimal">
+<li>Relationship between HIV prevalence and life expectancy.</li>
+</ol>
+<pre class="r"><code>Mutatation_life_expectancy &lt;- life_expectancy_years%&gt;%
+  select(country,&quot;1979&quot;:&quot;2011&quot;)%&gt;%
+  pivot_longer(cols=&quot;1979&quot;:&quot;2011&quot;,
+               names_to=&quot;year&quot;,
+               values_to=&quot;life_expectancy&quot;)
+
+Mutation_HIV_prevalence &lt;- adults_with_hiv_percent_age_15_49%&gt;%
+  select(country,&quot;1979&quot;:&quot;2011&quot;)%&gt;%
+  pivot_longer(cols=&quot;1979&quot;:&quot;2011&quot;,
+               names_to=&quot;year&quot;,
+               values_to=&quot;HIV_prevalence&quot;)
+
+Combined_data&lt;-inner_join(Mutatation_life_expectancy,Mutation_HIV_prevalence,by=c(&quot;country&quot;,&quot;year&quot;))
+Combined_data&lt;-inner_join(countries,Combined_data,by=&quot;country&quot;)
+
+ggplot(Combined_data, aes(y=life_expectancy,x=HIV_prevalence))+
+    geom_smooth(colour=&quot;red&quot;)+
+           geom_point(alpha = 0.4, size=0.4)+
+           facet_wrap(~region, scales=&quot;free&quot;)+
+    labs(title=&quot;Relationship between HIV prevalence and life expectancy&quot;,y=&quot;Life expectancy&quot;,x=&quot;HIV prevalence&quot;) +
+  theme_solarized()</code></pre>
+<p><img src="/projects/project2/index_files/figure-html/relationship_between_HIV_and_Life_Expectancy-1.png" width="648" style="display: block; margin: auto;" /></p>
+<p>Needed to have years as a column because earlier column headers were values not variable names.</p>
+<ol start="2" style="list-style-type: decimal">
+<li>Relationship between fertility rate and GDP per capita.</li>
+</ol>
+<pre class="r"><code>Combined_data_2 &lt;- inner_join(countries,worldbank_data,by=&quot;country&quot;)
+
+ggplot(Combined_data_2, aes(x=NY.GDP.PCAP.KD,y=SP.DYN.TFRT.IN))+
+    geom_smooth(colour=&quot;red&quot;)+
+           geom_point(alpha=0.4, size=0.4)+
+           facet_wrap(~region, scales = &quot;free&quot;)+
+    labs(title=&quot;Relationship between Fertility rate and GDP per capita&quot;,x=&quot;GDP per capita&quot;,y=&quot;Fertility rate&quot;) +
+  theme_solarized()</code></pre>
+<p><img src="/projects/project2/index_files/figure-html/relationship_between_fertility_rate_and_GDP_per_capita-1.png" width="648" style="display: block; margin: auto;" /></p>
+<ol start="3" style="list-style-type: decimal">
+<li>Regions with most observations of missing HIV data.</li>
+</ol>
+<pre class="r"><code>Combined_data_3 &lt;- Combined_data %&gt;%
+    filter(is.na(HIV_prevalence)) %&gt;%
+    group_by(region) %&gt;%
+    summarise(count=count(region))
+    ggplot(Combined_data_3,aes(x=count,y=reorder(region,count)))+
+    geom_col()+
+    geom_text_repel(aes(label = count)) +
+    theme_economist()+
+    labs(title=&quot;Number of missing HIV data&quot;,x=&quot;HIV Missing Data&quot;,y=&quot;Region&quot;)</code></pre>
+<p><img src="/projects/project2/index_files/figure-html/missing_HIV_data-1.png" width="648" style="display: block; margin: auto;" /></p>
+<ol start="4" style="list-style-type: decimal">
+<li>Top 5 countries that have seen the greatest improvement in mortality rates, as well as those 5 countries where mortality rates have had the least improvement or even deterioration.</li>
+</ol>
+<pre class="r"><code>cleaned_data_latest &lt;- Combined_data_2 %&gt;% filter(!is.na(SH.DYN.MORT)) %&gt;% group_by(region, country) %&gt;% 
+  top_n(n=1, wt=date) %&gt;% select(region, country, SH.DYN.MORT, date)
+
+cleaned_data_oldest &lt;- Combined_data_2 %&gt;% filter(!is.na(SH.DYN.MORT)) %&gt;% group_by(region, country) %&gt;% 
+  top_n(n=1, wt=-date) %&gt;% select(region, country, SH.DYN.MORT, date)
+
+improvement_data &lt;- cleaned_data_latest %&gt;% inner_join(cleaned_data_oldest,
+                                                       by=c(&quot;region&quot;, &quot;country&quot;),
+                                                       suffix = c(&quot;_latest&quot;, &quot;_oldest&quot;)) %&gt;% 
+  mutate(improvement = -((SH.DYN.MORT_latest - SH.DYN.MORT_oldest)/SH.DYN.MORT_oldest)*100.0) #negative sign because reduction in mortality is actually improvement in mortality
+improvement_data</code></pre>
+<pre><code>## # A tibble: 193 x 7
+## # Groups:   region, country [193]
+##    region country SH.DYN.MORT_lat~ date_latest SH.DYN.MORT_old~ date_oldest
+##    &lt;chr&gt;  &lt;chr&gt;              &lt;dbl&gt;       &lt;dbl&gt;            &lt;dbl&gt;       &lt;dbl&gt;
+##  1 South~ Afghan~             67.6        2016            345.         1962
+##  2 Sub-S~ Angola              84.2        2016            237.         1980
+##  3 Europ~ Albania              9.4        2016             96.2        1978
+##  4 Europ~ Andorra              3.4        2016             17.1        1985
+##  5 Middl~ United~              7.8        2016            200.         1960
+##  6 Latin~ Argent~             10.9        2016             72.5        1969
+##  7 Europ~ Armenia             13.7        2016             86.2        1976
+##  8 Latin~ Antigu~              7.4        2016             86.2        1960
+##  9 East ~ Austra~              3.8        2016             24.8        1960
+## 10 Europ~ Austria              3.6        2016             42.8        1960
+## # ... with 183 more rows, and 1 more variable: improvement &lt;dbl&gt;</code></pre>
+<pre class="r"><code>top_5_improvements_by_region &lt;- improvement_data %&gt;% group_by(region) %&gt;% top_n(n=5, wt=improvement) %&gt;% arrange(region, -improvement)
+top_5_improvements_by_region</code></pre>
+<pre><code>## # A tibble: 32 x 7
+## # Groups:   region [7]
+##    region country SH.DYN.MORT_lat~ date_latest SH.DYN.MORT_old~ date_oldest
+##    &lt;chr&gt;  &lt;chr&gt;              &lt;dbl&gt;       &lt;dbl&gt;            &lt;dbl&gt;       &lt;dbl&gt;
+##  1 East ~ Korea,~              3.4        2016            112.         1960
+##  2 East ~ Singap~              2.7        2016             47.7        1960
+##  3 East ~ Japan                2.7        2016             39.7        1960
+##  4 East ~ Thaila~             10.3        2016            146.         1960
+##  5 East ~ China                9.9        2016            118.         1969
+##  6 Europ~ Portug~              3.6        2016            114.         1960
+##  7 Europ~ Turkey              12.1        2016            257.         1960
+##  8 Europ~ Italy                3.4        2016             51.9        1960
+##  9 Europ~ Cyprus               2.6        2016             38.2        1971
+## 10 Europ~ Poland               4.7        2016             65.1        1960
+## # ... with 22 more rows, and 1 more variable: improvement &lt;dbl&gt;</code></pre>
+<pre class="r"><code>ggplot(top_5_improvements_by_region, aes(x=improvement, y=reorder(country, improvement))) +
+  geom_col() +
+  xlim(0, 100) +
+  facet_wrap(~region, scales = &quot;free&quot;) +
+  labs(title=&quot;Top 5 countries with highest improvement in mortality rates&quot;,
+       subtitle=&quot;improvement is calculated by -(latest mortality rate - oldest mortality rate)/oldest mortality rate * 100&quot;,
+       x = &quot;Improvement Percent&quot;,
+       y = &quot;Country&quot;) + 
+  geom_text(aes(label = improvement %&gt;% round(2))) +
+  theme_bw()</code></pre>
+<p><img src="/projects/project2/index_files/figure-html/mortality_rate-1.png" width="1152" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>bottom_5_improvements_by_region &lt;- improvement_data %&gt;% group_by(region) %&gt;% top_n(n=5, wt=-improvement) %&gt;% arrange(region, improvement)
+bottom_5_improvements_by_region</code></pre>
+<pre><code>## # A tibble: 32 x 7
+## # Groups:   region [7]
+##    region country SH.DYN.MORT_lat~ date_latest SH.DYN.MORT_old~ date_oldest
+##    &lt;chr&gt;  &lt;chr&gt;              &lt;dbl&gt;       &lt;dbl&gt;            &lt;dbl&gt;       &lt;dbl&gt;
+##  1 East ~ Micron~             32.5        2016             56.5        1981
+##  2 East ~ Korea,~             20          2016             35.1        1985
+##  3 East ~ Palau               19.1        2016             36.4        1985
+##  4 East ~ Nauru               33.9        2016             74.1        1985
+##  5 East ~ Tuvalu              26.4        2016             80.5        1975
+##  6 Europ~ Monaco               3.4        2016              9.7        1985
+##  7 Europ~ Turkme~             42.2        2016            133.         1977
+##  8 Europ~ Slovak~              6.1        2016             21.6        1981
+##  9 Europ~ Ukraine              9.2        2016             33.8        1971
+## 10 Europ~ Moldova             15.3        2016             64.1        1971
+## # ... with 22 more rows, and 1 more variable: improvement &lt;dbl&gt;</code></pre>
+<pre class="r"><code>ggplot(bottom_5_improvements_by_region, aes(x=improvement, y=reorder(country, -improvement))) +
+  geom_col() +
+  xlim(0, 100) +
+  facet_wrap(~region, scales = &quot;free&quot;) +
+  labs(title=&quot;Bottom 5 countries with lowest improvement in mortality rates&quot;,
+       subtitle=&quot;improvement is calculated by -(latest mortality rate - oldest mortality rate)/oldest mortality rate * 100&quot;,
+       x = &quot;Improvement Percent&quot;,
+       y = &quot;Country&quot;) + 
+  geom_text(aes(label = improvement %&gt;% round(2))) +
+  theme_bw()</code></pre>
+<p><img src="/projects/project2/index_files/figure-html/mortality_rate-2.png" width="1152" style="display: block; margin: auto;" /></p>
+<ol start="5" style="list-style-type: decimal">
+<li>Relationship between primary school enrollment and fertility rate.</li>
+</ol>
+<pre class="r"><code>ggplot(Combined_data_2, aes(x=SE.PRM.NENR,y=SP.DYN.TFRT.IN))+
+    geom_smooth(colour=&quot;red&quot;)+
+           geom_point()+
+    labs(title=&quot;Relationship between Fertility rate and Primary school enrollment&quot;,x=&quot;Primary school enrollment&quot;,y=&quot;Fertility rate&quot;)</code></pre>
+<p><img src="/projects/project2/index_files/figure-html/primary_school_enrollment_and_fertility_rate-1.png" width="648" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>ggplot(Combined_data_2, aes(x=SE.PRM.NENR,y=SP.DYN.TFRT.IN))+
+    geom_smooth(colour=&quot;red&quot;)+
+           geom_point(alpha=0.4, size=0.4)+
+           facet_wrap(~region, scales=&quot;free&quot;)+
+    labs(title=&quot;Relationship between Fertility rate and Primary school enrollment by region&quot;,x=&quot;Primary school enrollment&quot;,y=&quot;Fertility rate&quot;)</code></pre>
+<p><img src="/projects/project2/index_files/figure-html/primary_school_enrollment_and_fertility_rate-2.png" width="648" style="display: block; margin: auto;" /></p>
+</div>
+<div id="challenge-1-cdc-covid-19-public-use-data" class="section level1">
+<h1>Challenge 1: CDC COVID-19 Public Use Data</h1>
+<pre class="r"><code># file contains 11 variables and 3.66m rows and is well over 380Mb. 
+# It will take time to download
+
+# URL link to CDC to download data
+url &lt;- &quot;https://data.cdc.gov/api/views/vbim-akqf/rows.csv?accessType=DOWNLOAD&quot;
+
+covid_data &lt;- vroom::vroom(url)%&gt;% # If vroom::vroom(url) doesn&#39;t work, use read_csv(url)
+  clean_names()</code></pre>
+<ol style="list-style-type: decimal">
+<li>Graph by age group, sex, and whether the patient had co-morbidities or not</li>
+</ol>
+<pre class="r"><code>glimpse(covid_data)</code></pre>
+<pre><code>## Rows: 4,481,062
+## Columns: 11
+## $ cdc_report_dt               &lt;date&gt; 2020-03-22, 2020-03-23, 2020-03-15, 20...
+## $ pos_spec_dt                 &lt;date&gt; 2020-03-15, 2020-03-15, 2020-03-15, 20...
+## $ onset_dt                    &lt;date&gt; 2020-03-11, NA, NA, NA, NA, 2020-03-03...
+## $ current_status              &lt;chr&gt; &quot;Laboratory-confirmed case&quot;, &quot;Laborator...
+## $ sex                         &lt;chr&gt; &quot;Female&quot;, &quot;Female&quot;, &quot;Female&quot;, &quot;Female&quot;,...
+## $ age_group                   &lt;chr&gt; &quot;0 - 9 Years&quot;, &quot;0 - 9 Years&quot;, &quot;0 - 9 Ye...
+## $ race_and_ethnicity_combined &lt;chr&gt; &quot;Multiple/Other, Non-Hispanic&quot;, &quot;Unknow...
+## $ hosp_yn                     &lt;chr&gt; &quot;Yes&quot;, &quot;Unknown&quot;, &quot;Missing&quot;, &quot;Missing&quot;,...
+## $ icu_yn                      &lt;chr&gt; &quot;Yes&quot;, &quot;Unknown&quot;, &quot;Missing&quot;, &quot;Missing&quot;,...
+## $ death_yn                    &lt;chr&gt; &quot;No&quot;, &quot;Unknown&quot;, &quot;Missing&quot;, &quot;Missing&quot;, ...
+## $ medcond_yn                  &lt;chr&gt; &quot;Yes&quot;, &quot;Unknown&quot;, &quot;Missing&quot;, &quot;Missing&quot;,...</code></pre>
+<pre class="r"><code>covid_chart1 &lt;- covid_data %&gt;% 
+select(medcond_yn, death_yn, sex, age_group) %&gt;%
+        filter(!medcond_yn %in% c(&quot;Missing&quot;, &quot;Unknown&quot;, &quot;Other&quot;, NA),
+               !sex %in% c(&quot;Missing&quot;, &quot;Unknown&quot;, &quot;Other&quot;, NA),
+               !age_group %in% c(&quot;Missing&quot;, &quot;Unknown&quot;, &quot;Other&quot;, NA),
+               !death_yn %in% c(&quot;Missing&quot;, &quot;Unknown&quot;, &quot;Other&quot;, NA)) %&gt;% 
+  
+  mutate(medcond_with = ifelse(medcond_yn==&quot;Yes&quot;, &quot;With co-morbidities&quot;, &quot;Without co-morbidities&quot;)) %&gt;% 
+  group_by(age_group, sex, medcond_with) %&gt;% 
+  summarise(death = prop(death_yn, success = &quot;Yes&quot;), label = scales::percent(death %&gt;% round(2)))
+
+
+ggplot(covid_chart1, aes(x=death, y=age_group)) +
+  geom_col(fill = &quot;blue&quot;, alpha = 0.4) +
+  facet_grid(rows= vars(medcond_with), cols= vars(sex)) +
+  ggtitle(&quot;COVID Death Rate by Age Group, Sex, and Presence of Co-morbidities&quot;) +
+  geom_text_repel(label = covid_chart1$label) +
+  scale_x_continuous(labels = scales::percent) +
+  labs(x = NULL, y = NULL) +
+  theme_bw()</code></pre>
+<p><img src="/projects/project2/index_files/figure-html/covid_1-1.png" width="960" style="display: block; margin: auto;" /></p>
+<ol start="2" style="list-style-type: decimal">
+<li>Graph by age group, sex, and whether the patient was admited to Intensive Care Unit (ICU) or not.</li>
+</ol>
+<pre class="r"><code>covid_chart2 &lt;- covid_data %&gt;% 
+select(icu_yn, death_yn, sex, age_group) %&gt;% na.omit() %&gt;% 
+        filter(!icu_yn %in% c(&quot;Missing&quot;, &quot;Unknown&quot;, &quot;Other&quot;, NA),
+               !sex %in% c(&quot;Missing&quot;, &quot;Unknown&quot;, &quot;Other&quot;, NA),
+               !age_group %in% c(&quot;Missing&quot;, &quot;Unknown&quot;, &quot;Other&quot;, NA),
+               !death_yn %in% c(&quot;Missing&quot;, &quot;Unknown&quot;, &quot;Other&quot;, NA)) %&gt;% 
+  
+  mutate(in_icu = ifelse(icu_yn==&quot;Yes&quot;, &quot;Admitted to ICU&quot;, &quot;No ICU&quot;)) %&gt;% 
+  group_by(age_group, sex, in_icu) %&gt;% 
+  summarise(death = prop(death_yn, success = &quot;Yes&quot;), label = scales::percent(death %&gt;% round(2)))
+
+
+ggplot(covid_chart2, aes(x=death, y=age_group)) +
+  geom_col(fill = &quot;orange&quot;, alpha = 0.4) +
+  facet_grid(rows= vars(in_icu), cols= vars(sex))+
+  ggtitle(&quot;Death Rate by Age Group, Sex, and ICU Admission&quot;) +
+  geom_text_repel(label = covid_chart2$label) +
+  scale_x_continuous(labels = scales::percent) +
+  labs(x=NULL, y=NULL) +
+  theme_bw()</code></pre>
+<p><img src="/projects/project2/index_files/figure-html/covid_2-1.png" width="960" style="display: block; margin: auto;" /></p>
+</div>
+<div id="challenge-2-excess-rentals-in-tfl-bike-sharing" class="section level1">
+<h1>Challenge 2: Excess rentals in TfL bike sharing</h1>
+<pre class="r"><code>url &lt;- &quot;https://data.london.gov.uk/download/number-bicycle-hires/ac29363e-e0cb-47cc-a97a-e216d900a6b0/tfl-daily-cycle-hires.xlsx&quot;
+
+# Download TFL data to temporary file
+httr::GET(url, write_disk(bike.temp &lt;- tempfile(fileext = &quot;.xlsx&quot;)))</code></pre>
+<pre><code>## Response [https://airdrive-secure.s3-eu-west-1.amazonaws.com/london/dataset/number-bicycle-hires/2020-09-18T09%3A06%3A54/tfl-daily-cycle-hires.xlsx?X-Amz-Algorithm=AWS4-HMAC-SHA256&amp;X-Amz-Credential=AKIAJJDIMAIVZJDICKHA%2F20201018%2Feu-west-1%2Fs3%2Faws4_request&amp;X-Amz-Date=20201018T202608Z&amp;X-Amz-Expires=300&amp;X-Amz-Signature=35597876ce2fc3e485a4fec32e3c4467585ad86ccd4fd9d7e87830cbebd96f36&amp;X-Amz-SignedHeaders=host]
+##   Date: 2020-10-18 20:26
+##   Status: 200
+##   Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet
+##   Size: 165 kB
+## &lt;ON DISK&gt;  C:\Users\oak05\AppData\Local\Temp\RtmpMtWnt4\file2b886cfa35c3.xlsx</code></pre>
+<pre class="r"><code># Use read_excel to read it as dataframe
+bike0 &lt;- read_excel(bike.temp,
+                   sheet = &quot;Data&quot;,
+                   range = cell_cols(&quot;A:B&quot;))
+
+# change dates to get year, month, and week
+bike &lt;- bike0 %&gt;% 
+  clean_names() %&gt;% 
+  rename (bikes_hired = number_of_bicycle_hires) %&gt;% 
+  mutate (year = year(day),
+          month = lubridate::month(day, label = TRUE),
+          week = isoweek(day))</code></pre>
+<p>Create a facet grid that plots bikes hired by month and year.</p>
+<p>First few months of 2020 (Jan-Mar) look similar to previous years, but after that because of COVID, the variations (std deviation) is quite high as the curve is very wide.</p>
+<p>Reproduce the following two graphs.</p>
+<pre class="r"><code>glimpse(bike)</code></pre>
+<pre><code>## Rows: 3,686
+## Columns: 5
+## $ day         &lt;dttm&gt; 2010-07-30, 2010-07-31, 2010-08-01, 2010-08-02, 2010-0...
+## $ bikes_hired &lt;dbl&gt; 6897, 5564, 4303, 6642, 7966, 7893, 8724, 9797, 6631, 7...
+## $ year        &lt;dbl&gt; 2010, 2010, 2010, 2010, 2010, 2010, 2010, 2010, 2010, 2...
+## $ month       &lt;ord&gt; Jul, Jul, Aug, Aug, Aug, Aug, Aug, Aug, Aug, Aug, Aug, ...
+## $ week        &lt;dbl&gt; 30, 30, 30, 31, 31, 31, 31, 31, 31, 31, 32, 32, 32, 32,...</code></pre>
+<pre class="r"><code>expected_rentals_per_month_tbl &lt;- bike %&gt;% filter(year %in% c(2015, 2016, 2017, 2018, 2019)) %&gt;% group_by(month) %&gt;% 
+  summarise(expected_rentals = mean(bikes_hired))
+
+expected_rentals_per_month_tbl</code></pre>
+<pre><code>## # A tibble: 12 x 2
+##    month expected_rentals
+##    &lt;ord&gt;            &lt;dbl&gt;
+##  1 Jan             20259.
+##  2 Feb             21566.
+##  3 Mar             23115.
+##  4 Apr             28230.
+##  5 May             32422.
+##  6 Jun             35262.
+##  7 Jul             37809.
+##  8 Aug             34243.
+##  9 Sep             32433.
+## 10 Oct             29900.
+## 11 Nov             24365.
+## 12 Dec             19218.</code></pre>
+<pre class="r"><code>monthly_data &lt;- bike %&gt;% filter(year %in% c(2015, 2016, 2017, 2018, 2019, 2020)) %&gt;%  group_by(year, month) %&gt;% 
+  summarise(actual_rentals = mean(bikes_hired)) %&gt;% full_join(expected_rentals_per_month_tbl, by = &quot;month&quot;) %&gt;% 
+  mutate(excess_rentals = actual_rentals-expected_rentals)
+
+monthly_data</code></pre>
+<pre><code>## # A tibble: 68 x 5
+## # Groups:   year [6]
+##     year month actual_rentals expected_rentals excess_rentals
+##    &lt;dbl&gt; &lt;ord&gt;          &lt;dbl&gt;            &lt;dbl&gt;          &lt;dbl&gt;
+##  1  2015 Jan           18828.           20259.         -1431.
+##  2  2015 Feb           19617.           21566.         -1949.
+##  3  2015 Mar           22625.           23115.          -490.
+##  4  2015 Apr           27951.           28230.          -278.
+##  5  2015 May           29031.           32422.         -3391.
+##  6  2015 Jun           34659.           35262.          -604.
+##  7  2015 Jul           36607.           37809.         -1202.
+##  8  2015 Aug           33643.           34243.          -600.
+##  9  2015 Sep           30114.           32433.         -2319.
+## 10  2015 Oct           28560.           29900.         -1339.
+## # ... with 58 more rows</code></pre>
+<pre class="r"><code>ggplot(monthly_data, aes(x=month, y=actual_rentals, group=year)) +
+  geom_line()+
+  geom_line(aes(y=expected_rentals), color=&quot;blue&quot;) +
+  facet_wrap(~year, nrow=2) +
+  geom_ribbon(aes(ymin = ifelse(excess_rentals &gt;= 0, expected_rentals, actual_rentals),
+                  ymax = actual_rentals), alpha=0.2, fill=&quot;green&quot;) +
+  geom_ribbon(aes(ymin = ifelse(excess_rentals &gt;= 0, expected_rentals, actual_rentals),
+                  ymax = expected_rentals), alpha=0.2, fill=&quot;red&quot;) +
+  labs(title = &quot;Monthly changes in Tfl Bike rentals&quot;,
+       subtitle = &quot;Change from monthly average shown in blue and calculated between 2015-2019&quot;,
+       y = &quot;Bike Rentals&quot;,
+       x = NULL) +
+  theme_bw() +
+  NULL</code></pre>
+<p><img src="/projects/project2/index_files/figure-html/monthly_changes_in_tfl_bikes-1.png" width="960" style="display: block; margin: auto;" /></p>
+<p>The second one looks at percentage changes from the expected level of weekly rentals. The two grey shaded rectangles correspond to the second (weeks 14-26) and fourth (weeks 40-52) quarters.</p>
+<pre class="r"><code>expected_rentals_per_week_tbl &lt;- bike %&gt;% filter(year %in% c(2015, 2016, 2017, 2018, 2019)) %&gt;% group_by(week) %&gt;% 
+  summarise(expected_rentals = mean(bikes_hired))
+
+expected_rentals_per_week_tbl</code></pre>
+<pre><code>## # A tibble: 53 x 2
+##     week expected_rentals
+##    &lt;dbl&gt;            &lt;dbl&gt;
+##  1     1           16360.
+##  2     2           21402.
+##  3     3           21540.
+##  4     4           21407.
+##  5     5           20795.
+##  6     6           20058.
+##  7     7           22761.
+##  8     8           22602.
+##  9     9           20176.
+## 10    10           23561.
+## # ... with 43 more rows</code></pre>
+<pre class="r"><code>weekly_data &lt;- bike %&gt;% filter(year %in% c(2015, 2016, 2017, 2018, 2019, 2020)) %&gt;%  group_by(year, week) %&gt;% 
+  summarise(actual_rentals = mean(bikes_hired)) %&gt;% full_join(expected_rentals_per_week_tbl, by = &quot;week&quot;) %&gt;% 
+  mutate(excess_rentals_percent = (actual_rentals-expected_rentals)/expected_rentals,
+         color_id = ifelse(excess_rentals_percent &gt;= 0, &quot;&gt;=0&quot;, &quot;&lt;0&quot;))
+
+weekly_data</code></pre>
+<pre><code>## # A tibble: 298 x 6
+## # Groups:   year [6]
+##     year  week actual_rentals expected_rentals excess_rentals_percent color_id
+##    &lt;dbl&gt; &lt;dbl&gt;          &lt;dbl&gt;            &lt;dbl&gt;                  &lt;dbl&gt; &lt;chr&gt;   
+##  1  2015     1         10038.           16360.               -0.386   &lt;0      
+##  2  2015     2         18786.           21402.               -0.122   &lt;0      
+##  3  2015     3         20131.           21540.               -0.0654  &lt;0      
+##  4  2015     4         21158.           21407.               -0.0117  &lt;0      
+##  5  2015     5         19201.           20795.               -0.0767  &lt;0      
+##  6  2015     6         19386.           20058.               -0.0335  &lt;0      
+##  7  2015     7         20787            22761.               -0.0867  &lt;0      
+##  8  2015     8         18711.           22602.               -0.172   &lt;0      
+##  9  2015     9         20213.           20176.                0.00181 &gt;=0     
+## 10  2015    10         24196.           23561.                0.0269  &gt;=0     
+## # ... with 288 more rows</code></pre>
+<pre class="r"><code>ggplot(weekly_data, aes(x=week, y=excess_rentals_percent, group=year)) +
+  geom_rect(aes(xmin=14, xmax=26, ymin=-0.6, ymax=0.6), show.legend = FALSE, alpha = 0.2, fill = &quot;grey&quot;) +
+  geom_rect(aes(xmin=40, xmax=52, ymin=-0.6, ymax=0.6), show.legend = FALSE, alpha = 0.2, fill = &quot;grey&quot;) +
+  geom_line(aes(y=excess_rentals_percent), color=&quot;black&quot;) +
+  facet_wrap(~year, nrow=2) +
+  geom_ribbon(aes(ymin = 0, ymax = ifelse(excess_rentals_percent &gt;= 0, excess_rentals_percent, 0)),
+              alpha=0.2, fill=&quot;green&quot;) +
+  geom_ribbon(aes(ymin = ifelse(excess_rentals_percent &lt; 0, excess_rentals_percent, 0),
+                  ymax = 0), alpha=0.2, fill=&quot;red&quot;) +
+  
+  scale_fill_gradient(low = &quot;white&quot;,high = &quot;grey&quot;, limits=c(0,1)) +
+  geom_rug(aes(color = color_id), sides=&quot;b&quot;, show.legend = FALSE) +
+  scale_colour_manual(values=c(&quot;#CB454A&quot;,&quot;#7DCD85&quot;), name=&quot;Actual vs Expected &quot;, guide=FALSE) +
+  scale_x_continuous(breaks = seq(0,53, by = 13)) +
+  scale_y_continuous(labels = scales::percent) +
+  labs(title = &quot;Weekly changes in Tfl Bike rentals&quot;,
+       subtitle = &quot;%age change from weekly averages calculated between 2015-2019&quot;,
+       y = NULL,
+       x = NULL) +
+  theme_bw() +
+  NULL</code></pre>
+<p><img src="/projects/project2/index_files/figure-html/weekly_change_in_tfl_bikes-1.png" width="960" style="display: block; margin: auto;" /></p>
+<p>I have used ‘mean’ here because then my chart matches with the image, but I’d have preferred to use median because mean gets distorted due to outliers while median doesn’t.</p>
+</div>
+<div id="details" class="section level1">
+<h1>Details</h1>
+<ul>
+<li>Who did you collaborate with: DEEPAK GUNEJA, WARREN HU, JUSTINE VEYRENC, RICCARDO PERSICO, ALEX SKLAVOUNOS, CHENYING LI</li>
+<li>Approximately how much time did you spend on this problem set: 20 hours</li>
+<li>What, if anything, gave you the most trouble: Replicating images</li>
+</ul>
+</div>
+
+                        </div>
+                    </section>
+            <!-- Disqus Inject -->
+                
+            </div>
+            
+        <!-- Footer -->
+            
+                <!-- Footer -->
+    <footer id="footer">
+        <div class="inner">
+            <ul class="icons">
+                
+                    <li><a href="https://github.com/whu3574121" class="icon alt fa-github" target="_blank"><span class="label">GitHub</span></a></li>
+                
+                    <li><a href="https://www.linkedin.com/in/warren-hu-5a9843171/" class="icon alt fa-linkedin" target="_blank"><span class="label">LinkedIn</span></a></li>
+                
+            </ul>
+            <ul class="copyright">
+                <li>&copy; Stream B Group 35</li>
+                
+            </ul>
+        </div>
+    </footer>
+
+            
+        </div>
+
+    <!-- Scripts -->
+        <!-- Scripts -->
+    <!-- jQuery -->
+    <script src="/js/jquery.min.js"></script>
+    <script src="/js/jquery.scrolly.min.js"></script>
+    <script src="/js/jquery.scrollex.min.js"></script>
+    <script src="/js/skel.min.js"></script>
+    <script src="/js/util.js"></script>
+
+    
+
+    <!-- Main JS -->
+    <script src="/js/main.js"></script>
+
+    
+
+    
+
+    </body>
+</html>
